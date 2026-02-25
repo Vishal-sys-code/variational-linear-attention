@@ -25,71 +25,58 @@ def inner_product_score(k: torch.Tensor, q: torch.Tensor, scale: float = None) -
     
     return score
 
-def sherman_morrison_update(A0: torch.Tensor, u: torch.Tensor, epsilon: float = 1e-6) -> torch.Tensor:
+def sherman_morrison_update(A0: torch.Tensor, u: torch.Tensor, epsilon: float = 1e-12) -> torch.Tensor:
     """
-    Computes the Sherman-Morrison rank-1 inverse update.
-    
-    Given A0 = inverse(M0) and u, computes A = inverse(M0 + u u^T).
-    Formula: A = A0 - (A0 u u^T A0) / (1 + u^T A0 u)
-    
-    Args:
-        A0: Current inverse matrix of shape (d, d).
-        u: Update vector of shape (d,).
-        epsilon: Numerical stability threshold.
-        
-    Returns:
-        Updated inverse matrix A.
-    """
-    assert A0.dim() == 2 and A0.size(0) == A0.size(1), f"A0 must be square matrix, got {A0.shape}"
-    assert u.dim() == 1, f"u must be a vector, got {u.shape}"
-    assert A0.size(0) == u.size(0), f"Dimension mismatch: A0={A0.shape}, u={u.shape}"
-    
-    # 2.1 Compute denominator (scalar): δ = 1 + u^T (A0 u)
-    A0_u = A0 @ u  # Shape (d,)
-    u_A0_u = torch.dot(u, A0_u) # Scalar
-    delta = 1.0 + u_A0_u
-    
-    # 2.2 Numerical safety
-    # "if abs(δ) < ε: δ = δ + ε # or fallback to δ = ε"
-    if torch.abs(delta) < epsilon:
-        delta = delta + epsilon
-        # If still too small (e.g. delta was -epsilon), force it to epsilon?
-        # The prompt implies a simple shift. Let's trust the shift prevents 0 division.
-        # But if delta was -epsilon/2, delta+epsilon is epsilon/2.
-        # If delta was exactly -epsilon, delta+epsilon is 0. This is risky.
-        # "fallback to delta = epsilon" might be safer if result is still small.
-        if torch.abs(delta) < epsilon:
-             delta = torch.tensor(epsilon, dtype=delta.dtype, device=delta.device) * (torch.sign(delta) if delta != 0 else 1.0)
+    Robust Sherman-Morrison rank-1 inverse update.
+    Given A0 = inverse(M0) and vector u, compute A = inverse(M0 + u u^T)
+    via A = A0 - (A0 u u^T A0) / (1 + u^T A0 u)
 
-    # 2.3 Compute intermediate vector: z = A0 u
+    This implementation:
+    - uses a safe epsilon fallback when denom is too small
+    - preserves symmetry to mitigate small numeric asymmetry
+    - supports float32/float64 inputs (keeps dtype/device)
+    """
+    if not (A0.dim() == 2 and A0.size(0) == A0.size(1)):
+        raise AssertionError(f"A0 must be square matrix, got {A0.shape}")
+    if not (u.dim() == 1):
+        raise AssertionError(f"u must be a vector, got {u.shape}")
+    if A0.size(0) != u.size(0):
+        raise AssertionError(f"Dimension mismatch: A0={A0.shape}, u={u.shape}")
+
+    # Ensure we use the same dtype/device
+    device = A0.device
+    dtype = A0.dtype
+
+    # Compute A0 @ u
+    A0_u = A0 @ u            # shape (d,)
+    u_A0_u = torch.dot(u, A0_u)  # scalar tensor
+
+    # Denominator
+    delta = (1.0 + u_A0_u).to(dtype=dtype, device=device)
+
+    # Safety: if |delta| is extremely small, set to epsilon (positive)
+    if torch.abs(delta) < epsilon:
+        delta = torch.tensor(epsilon, dtype=dtype, device=device)
+
+    # Numerator: z z^T where z = A0 u
     z = A0_u
-    
-    # 2.4 Compute outer product: O = z z^T
+    # Outer product (d,d)
     O = torch.outer(z, z)
-    
-    # 2.5 Final update: A = A0 - O / δ
+
+    # Update
     A = A0 - O / delta
-    
-    # 2.6 Validate
-    assert torch.all(torch.isfinite(A)), "Resulting matrix A contains non-finite values"
-    
-    # Optionally symmetrize
-    A = 0.5 * (A + A.T)
-    
+
+    # Symmetrize to remove tiny asymmetric numerical noise
+    A = 0.5 * (A + A.transpose(-1, -2))
+
+    # Final safety check
+    if not torch.all(torch.isfinite(A)):
+        raise RuntimeError("sherman_morrison_update produced non-finite entries")
+
     return A
 
-def multiple_rank1_updates(A0: torch.Tensor, updates: list[torch.Tensor], epsilon: float = 1e-6) -> torch.Tensor:
-    """
-    Applies multiple Sherman-Morrison updates sequentially.
-    
-    Args:
-        A0: Initial inverse matrix.
-        updates: List of update vectors [u1, u2, ...].
-        epsilon: Numerical stability threshold.
-        
-    Returns:
-        Final updated inverse matrix.
-    """
+
+def multiple_rank1_updates(A0: torch.Tensor, updates: list[torch.Tensor], epsilon: float = 1e-12) -> torch.Tensor:
     A = A0
     for u in updates:
         A = sherman_morrison_update(A, u, epsilon=epsilon)
