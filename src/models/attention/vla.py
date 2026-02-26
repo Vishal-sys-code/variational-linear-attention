@@ -22,7 +22,10 @@ class VLALayer(nn.Module):
     ):
         super().__init__()
         self.d_model = d_model
+        # Enforce d_head = d_model as per requirements unless explicitly varied,
+        # but spec says "Set d_head = d_model Across all layers".
         self.d_head = d_head if d_head is not None else d_model
+        
         self.lambda_0 = lambda_0
         self.penalty_rank = penalty_rank
 
@@ -30,6 +33,9 @@ class VLALayer(nn.Module):
         self.W_q = nn.Linear(d_model, self.d_head)
         self.W_k = nn.Linear(d_model, self.d_head)
         self.W_v = nn.Linear(d_model, self.d_head)
+        
+        # Output Projection W_o: (d_head -> d_model)
+        self.W_o = nn.Linear(self.d_head, self.d_model)
         
         # W_u is handled inside PenaltyBuilder, which takes k_t as input.
         # PenaltyBuilder input dim is d_head (since k_t is d_head).
@@ -58,7 +64,7 @@ class VLALayer(nn.Module):
             x: Input tensor of shape (B, T, d_model).
             
         Returns:
-            Output tensor of shape (B, T, d_head).
+            Output tensor of shape (B, T, d_model).
         """
         B, T, _ = x.shape
         device = x.device
@@ -122,5 +128,8 @@ class VLALayer(nn.Module):
 
         # Step 5: Stack outputs
         O = torch.stack(outputs, dim=1)  # (B, T, d_head)
+        
+        # Step 6: Output Projection
+        O = self.W_o(O)  # (B, T, d_model)
         
         return O
