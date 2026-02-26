@@ -51,7 +51,7 @@ def test_vla_small_t_reference():
     
     # Get model output
     with torch.no_grad():
-        model_out = model(x) # (B, T, d_head)
+        model_out = model(x) # (B, T, d_model)
         
     # Reference Implementation
     # We iterate batch items manually or vectorized
@@ -108,7 +108,10 @@ def test_vla_small_t_reference():
             
             # Output o_t
             # o_t = S_t q_t
-            o_t_ref = torch.mv(S, q_t) # (d_head,)
+            o_t_pre = torch.mv(S, q_t) # (d_head,)
+            
+            # Apply W_o
+            o_t_ref = model.W_o(o_t_pre) # (d_model,)
             
             # Compare with model output
             o_t_model = model_out[b, t]
