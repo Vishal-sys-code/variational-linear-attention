@@ -46,18 +46,28 @@ def test_check_1_deltanet_recovery():
         vals.append(v_t)
         betas.append(beta_t)
 
-        # Reconstruct output using survival-product coefficients
+        # Compute alphas using exact recurrence-compatible formula
         alphas = []
+
         for i in range(t + 1):
-            k_i = keys[i]                   # (d,)
-            beta_i = betas[i]               # Python float
-            surv = torch.tensor(beta_i, dtype=dtype, device=device)  # make tensor
-            if t > i:
-                # product over j = i+1..t
-                for j in range(i + 1, t + 1):
-                    surv = surv * (1.0 - betas[j] * torch.dot(keys[j], k_i))
-            s_i = torch.dot(k_i, q_t)       # tensor scalar
-            alpha_i = surv * s_i            # tensor scalar
+            k_i = keys[i]
+            beta_i = betas[i]
+
+            # γ_i needs to be a vector to track direction changes
+            # We are computing: k_i^T * Prod_{j=i+1}^t (I - beta_j k_j k_j^T) * q_t
+            # Let gamma_vec = k_i^T * Prod_{j=i+1}^t (I - beta_j k_j k_j^T)
+            gamma_vec = k_i.clone()
+
+            # Apply decay for j = i+1 .. t
+            for j in range(i + 1, t + 1):
+                k_j = keys[j]
+                beta_j = betas[j]
+                # gamma_vec = gamma_vec (I - beta_j k_j k_j^T)
+                #           = gamma_vec - beta_j * (gamma_vec . k_j) * k_j
+                dot_val = torch.dot(gamma_vec, k_j)
+                gamma_vec = gamma_vec - beta_j * dot_val * k_j
+
+            alpha_i = beta_i * torch.dot(gamma_vec, q_t)
             alphas.append(alpha_i)
 
         alpha_vec = torch.stack(alphas, dim=0)         # (t+1,)
@@ -80,7 +90,7 @@ def test_check_2_spd_property():
 
     d = 8
     B = 4
-    builder = PenaltyBuilder(d_model=d, rank=1)
+    builder = PenaltyBuilder(d_model=d, rank=1).to(dtype=dtype, device=device)
 
     k = torch.randn(B, d, dtype=dtype, device=device)
     lambda_t, u_t, _ = builder(k)
@@ -114,14 +124,14 @@ def test_check_3_rank_r_consistency():
     B = 2
     T = 3
 
-    b1 = PenaltyBuilder(d_model=d, rank=1)
+    b1 = PenaltyBuilder(d_model=d, rank=1).to(dtype=dtype, device=device)
     k_seq = torch.randn(B, T, d, dtype=dtype, device=device)
     l1, u1, _ = b1(k_seq)
     assert l1.shape == (B, T, 1)
     assert u1.shape == (B, T, d)
 
     r = 3
-    br = PenaltyBuilder(d_model=d, rank=r)
+    br = PenaltyBuilder(d_model=d, rank=r).to(dtype=dtype, device=device)
     lr, ur, _ = br(k_seq)
     assert lr.shape == (B, T, 1)
     assert ur.shape == (B, T, r, d)
