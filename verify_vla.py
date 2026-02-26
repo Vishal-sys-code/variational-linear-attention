@@ -11,7 +11,7 @@ def verify_vla_forward():
     B = 2
     T = 16
     d_model = 8
-    d_head = 4
+    d_head = 8  # Enforce d_head = d_model per Step B2 requirements
     
     print(f"Config: B={B}, T={T}, d_model={d_model}, d_head={d_head}")
     
@@ -40,7 +40,7 @@ def verify_vla_forward():
         return
 
     # 5. Output Shape Check
-    expected_shape = (B, T, d_head)
+    expected_shape = (B, T, d_model)
     if output.shape == expected_shape:
         print(f"✅ Output shape matches expected: {output.shape}")
     else:
