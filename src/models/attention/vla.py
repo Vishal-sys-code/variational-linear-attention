@@ -56,15 +56,16 @@ class VLALayer(nn.Module):
             enable_renorm=False  # Default per spec (implied standard behavior unless specified)
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Forward pass for VLA layer.
         
         Args:
             x: Input tensor of shape (B, T, d_model).
+            return_states: If True, returns a tuple (O, states) with diagnostic states.
             
         Returns:
-            Output tensor of shape (B, T, d_model).
+            Output tensor of shape (B, T, d_model), optionally with states dict.
         """
         B, T, _ = x.shape
         device = x.device
@@ -77,6 +78,8 @@ class VLALayer(nn.Module):
         self.memory_manager.reset(batch_size=B, device=device, dtype=torch.float32)
 
         outputs = []
+        if return_states:
+            states = {"A": [], "S_norm": [], "q": [], "v": [], "alpha": []}
 
         # Iterate over tokens
         for t in range(T):
@@ -125,6 +128,14 @@ class VLALayer(nn.Module):
             o_t = self.memory_manager.compute_output(q_t)  # (B, d_head)
             
             outputs.append(o_t)
+            
+            if return_states:
+                states["A"].append(A_t.clone().detach().cpu())
+                S_t = self.memory_manager.get_S()
+                states["S_norm"].append(torch.norm(S_t, p='fro', dim=(1,2)).clone().detach().cpu())
+                states["q"].append(q_t.clone().detach().cpu())
+                states["v"].append(v_t.clone().detach().cpu())
+                states["alpha"].append(alpha_t.clone().detach().cpu())
 
         # Step 5: Stack outputs
         O = torch.stack(outputs, dim=1)  # (B, T, d_head)
@@ -132,4 +143,9 @@ class VLALayer(nn.Module):
         # Step 6: Output Projection
         O = self.W_o(O)  # (B, T, d_model)
         
+        if return_states:
+            # Stack states along time dimension T
+            for k in states.keys():
+                states[k] = torch.stack(states[k], dim=1)  # (B, T, ...)
+            return O, states
         return O
