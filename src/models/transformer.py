@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from typing import Optional
+from typing import Optional, Tuple
 
 from src.models.attention.vla import VLALayer
 
@@ -41,19 +41,26 @@ class VLATransformerBlock(nn.Module):
             nn.Dropout(dropout)
         )
         
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Args:
             x: Input tensor (B, T, d_model)
+            return_states: If True, returns (output, states)
         Returns:
-            Output tensor (B, T, d_model)
+            Output tensor (B, T, d_model) + optional states dict
         """
         # Pre-LN Architecture
         
         # 1. Attention Path
         residual = x
         x_norm = self.ln1(x)
-        attn_out = self.vla(x_norm)
+        
+        if return_states:
+            attn_out, states = self.vla(x_norm, return_states=True)
+        else:
+            attn_out = self.vla(x_norm)
+            states = None
+            
         x = residual + self.dropout1(attn_out)
         
         # 2. FFN Path
@@ -62,6 +69,8 @@ class VLATransformerBlock(nn.Module):
         ffn_out = self.ffn(x_norm)
         x = residual + ffn_out
         
+        if return_states:
+            return x, states
         return x
 
 
@@ -105,12 +114,13 @@ class VLATransformer(nn.Module):
         
         self.head = nn.Linear(d_model, vocab_size)
         
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Args:
             x: Input token indices (B, T)
+            return_states: If true, returns states from the last VLA layer.
         Returns:
-            Logits (B, T, vocab_size)
+            Logits (B, T, vocab_size) + optional states dict
         """
         B, T = x.shape
         device = x.device
@@ -125,8 +135,12 @@ class VLATransformer(nn.Module):
         x = self.dropout(tok_emb + pos_emb)
         
         # Layers
-        for layer in self.layers:
-            x = layer(x)
+        states = None
+        for i, layer in enumerate(self.layers):
+            if return_states and i == len(self.layers) - 1:
+                x, states = layer(x, return_states=True)
+            else:
+                x = layer(x)
             
         # Final Norm
         x = self.ln_f(x)
@@ -134,4 +148,6 @@ class VLATransformer(nn.Module):
         # Output Head
         logits = self.head(x) # (B, T, vocab_size)
         
+        if return_states:
+            return logits, states
         return logits
