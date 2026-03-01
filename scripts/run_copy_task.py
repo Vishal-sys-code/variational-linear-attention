@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 from src.models.transformer import VLATransformer
 from src.benchmarks.synthetic.dataset import CopyTaskDataset
 from src.benchmarks.synthetic.metrics import PerformanceLogger, compute_survival_matrix
@@ -66,8 +67,19 @@ def run_copy_task():
     model.train()
     step = 0
     
+    print("=" * 60)
+    print("🚀 Starting Phase C1: Copy / Identity Task")
+    print("=" * 60)
+    print(f"📦 Config: D_model={config['d_model']}, Layers={config['n_layers']}, SeqLen={config['seq_len']}")
+    print(f"🔄 Epochs: {config['epochs']}, Batch Size: {config['batch_size']}")
+    print("-" * 60)
+    
     for epoch in range(config["epochs"]):
-        for x, y in loader:
+        pbar = tqdm(loader, desc=f"Epoch {epoch+1:03d}/{config['epochs']:03d}", leave=True,
+                    bar_format="{l_bar}{bar:20}{r_bar}")
+        epoch_loss = 0.0
+        
+        for batch_idx, (x, y) in enumerate(pbar):
             x, y = x.to(device), y.to(device)
             logger.start()
             
@@ -79,10 +91,12 @@ def run_copy_task():
                 # Compute diagnostic metrics
                 A_t = states["A"][0] # (T, d, d)
                 cond_vals = [torch.linalg.cond(a.to(torch.float64)).item() for a in A_t]
-                conds.append(sum(cond_vals)/len(cond_vals))
+                current_cond = sum(cond_vals)/len(cond_vals)
+                conds.append(current_cond)
                 
                 S_norm = states["S_norm"][0] # (T,)
-                norms.append(S_norm.mean().item())
+                current_norm = S_norm.mean().item()
+                norms.append(current_norm)
                 
                 # Compute survival across T
                 q_list = states["q"][0] # (T, d)
@@ -93,18 +107,16 @@ def run_copy_task():
                 survival = torch.zeros(T_len, T_len)
                 for t_read in range(T_len):
                     q_t = q_list[t_read] # (d,)
-                    # survivial of i at t_read involves v_i * alpha_i^T q_t
-                    # we can vectorize this
                     surv = compute_survival_matrix(alphas.unsqueeze(1), q_t.unsqueeze(0), v_list.unsqueeze(1)).squeeze(1) # (T_write,)
-                    # Only past matters
                     surv[t_read+1:] = 0
                     survival[:, t_read] = surv
                     
                 survival_trace = survival.cpu().numpy()
             else:
                 logits = model(x)
+                current_cond = conds[-1] if conds else 0.0
+                current_norm = norms[-1] if norms else 0.0
                 
-            # Logits: (B, T, V). Target: (B, T)
             loss = criterion(logits.view(-1, config["vocab_size"]), y.view(-1))
             
             optimizer.zero_grad()
@@ -113,14 +125,26 @@ def run_copy_task():
             
             time_taken = logger.end()
             mem_stats = logger.get_memory_stats()
+            mem_allocated = mem_stats.get('allocated_mb', 0.0)
             
             losses.append(loss.item())
+            epoch_loss += loss.item()
             step += 1
             
-        print(f"Epoch {epoch} | Loss: {loss.item():.4f}")
-        
-    # Check Accuracy
-    model.eval()
+            # Update progress bar beautifully
+            pbar.set_postfix({
+                "Loss": f"{loss.item():.4f}", 
+                "A_kappa": f"{current_cond:.1e}",
+                "S_norm": f"{current_norm:.1f}",
+                "Mem(MB)": f"{mem_allocated:.0f}"
+            })
+            
+        avg_loss = epoch_loss / len(loader)
+        if epoch == config["epochs"] - 1:
+            print(f"✅ Epoch {epoch+1:03d} Completed | Avg Loss: {avg_loss:.4f}")
+
+    print("-" * 60)
+    print("📈 Evaluating Accuracy...")
     correct = 0
     total = 0
     with torch.no_grad():
