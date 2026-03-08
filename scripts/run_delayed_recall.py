@@ -173,5 +173,12 @@ Criteria Met.
         f.write(report_content)
 
 if __name__ == "__main__":
-    for d in [5, 10, 20]:
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Delayed Recall Task")
+    parser.add_argument("--delay", type=int, help="Specific delay to run (e.g., 5, 10, or 20). If not provided, runs all.")
+    args = parser.parse_args()
+    
+    delays_to_run = [args.delay] if args.delay else [5, 10, 20]
+    
+    for d in delays_to_run:
         run_delayed_recall(d)
