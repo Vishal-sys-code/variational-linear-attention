@@ -86,6 +86,8 @@ class MemoryMatrixManager(nn.Module):
         
         # Cast inputs to float32 for update stability if they aren't already
         v_t_f32 = v_t.to(dtype=torch.float32)
+        # Normalize v_t before writing to prevent S_t from exploding
+        v_t_f32 = v_t_f32 / (torch.norm(v_t_f32, dim=-1, keepdim=True) + 1e-6)
         alpha_t_f32 = alpha_t.to(dtype=torch.float32)
         
         # Compute outer product: v_t (alpha_t)^T
