@@ -14,17 +14,17 @@ import src.benchmarks.synthetic.plots as plots
 from scripts.run_copy_task import set_seed
 
 def run_associative_recall():
+    """Run Associative Recall Task."""
     config = {
         "seed": 42,
-        "vocab_size": 100,
-        "num_pairs": 15,
+        "vocab_size": 100, # Large vocab for keys/values
+        "num_pairs": 8,
         "num_queries": 5,
-        "num_distractors": 5,
         "d_model": 64,
         "n_layers": 2,
         "batch_size": 32,
         "epochs": 100,
-        "lr": 1e-3,
+        "lr": 3e-4,
         "log_every_n_steps": 5
     }
     
