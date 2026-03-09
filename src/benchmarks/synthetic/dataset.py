@@ -65,7 +65,10 @@ class AssociativeRecallDataset(Dataset):
         self.vocab_size = vocab_size
         self.pad_token = pad_token
         
-        self.seq_len = (num_pairs * 2) + num_distractors + num_queries
+        # New: Reserve a specific index for the QUERY token
+        self.query_token = vocab_size - 1
+        
+        self.seq_len = (num_pairs * 2) + num_distractors + 1 + num_queries # +1 for QUERY token
 
     def __len__(self):
         return self.num_samples
@@ -73,8 +76,10 @@ class AssociativeRecallDataset(Dataset):
     def __getitem__(self, idx):
         # Keys and values from distinct spaces or same? Same vocab space.
         # Ensure keys are unique within a sequence
-        keys = torch.randperm(self.vocab_size - 1)[:self.num_pairs] + 1
-        values = torch.randint(1, self.vocab_size, (self.num_pairs,))
+        # We reserve 0 for PAD, vocab_size-1 for QUERY. 
+        # So we draw from [1, vocab_size - 2].
+        keys = torch.randperm(self.vocab_size - 2)[:self.num_pairs] + 1
+        values = torch.randint(1, self.vocab_size - 1, (self.num_pairs,))
         
         seq = []
         # Add pairs
@@ -83,8 +88,11 @@ class AssociativeRecallDataset(Dataset):
             
         # Add distractors (if any)
         if self.num_distractors > 0:
-            distractors = torch.randint(1, self.vocab_size, (self.num_distractors,))
+            distractors = torch.randint(1, self.vocab_size - 1, (self.num_distractors,))
             seq.extend(distractors.tolist())
+            
+        # Add QUERY token
+        seq.append(self.query_token)
             
         # Add queries
         query_indices = torch.randint(0, self.num_pairs, (self.num_queries,))
@@ -94,6 +102,7 @@ class AssociativeRecallDataset(Dataset):
         seq = torch.tensor(seq, dtype=torch.long)
         
         # Target: Pad everywhere except query positions
+        # The query positions start right after the QUERY token.
         target = torch.full_like(seq, self.pad_token)
         query_start_idx = len(seq) - self.num_queries
         target[query_start_idx:] = values[query_indices]
