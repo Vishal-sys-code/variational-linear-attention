@@ -20,6 +20,7 @@ def run_associative_recall():
         "vocab_size": 100, # Large vocab for keys/values
         "num_pairs": 8,
         "num_queries": 5,
+        "num_distractors": 0,
         "d_model": 64,
         "n_layers": 2,
         "batch_size": 32,
