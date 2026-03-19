@@ -123,6 +123,20 @@ class VLALayer(nn.Module):
 
             # Step 4.6: Update memory matrix S_t
             self.memory_manager.update(v_t, alpha_t)
+            
+            # Step 4.6b: Norm explosion stabilization
+            S_t = self.memory_manager.get_S()
+            # check norm per-batch element
+            S_norm = torch.norm(S_t, p='fro', dim=(1,2))
+            A_norm = torch.norm(A_t, p='fro', dim=(1,2))
+            
+            mask_explode = (S_norm > 1000) | (A_norm > 1000)
+            if mask_explode.any():
+                I = torch.eye(self.d_head, device=device, dtype=dtype).unsqueeze(0).expand(B, -1, -1)
+                fallback_add = 1e-5 * I
+                mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
+                A_t = torch.where(mask_expanded, A_t + fallback_add, A_t)
+                self.inverse_tracker.A_t = A_t
 
             # Step 4.7: Compute output o_t
             o_t = self.memory_manager.compute_output(q_t)  # (B, d_head)

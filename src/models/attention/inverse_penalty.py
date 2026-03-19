@@ -111,8 +111,8 @@ class InversePenaltyTracker(nn.Module):
         delta = 1.0 + dot
         
         # 3. Check stability
-        # If |delta| < eps, fallback: A_t = A_{prev} + eps * I
-        mask_unstable = torch.abs(delta) < self.stabilization_eps
+        # If |delta| < eps or NaN/Inf detected, fallback: A_t = A_{prev} + eps * I
+        mask_unstable = (torch.abs(delta) < self.stabilization_eps) | ~torch.isfinite(delta)
         
         # Increment step before applying updates (or after? prompt says "Every K steps". 
         # Usually implies check after update or before. 

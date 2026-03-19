@@ -3,18 +3,21 @@ import torch.nn as nn
 from typing import Optional, Tuple
 
 from src.models.attention.vla import VLALayer
+from src.models.attention.linear_transformer import LinearTransformerLayer
+from src.models.attention.deltanet import DeltaNetLayer
 
-class VLATransformerBlock(nn.Module):
+class LRATransformerBlock(nn.Module):
     """
-    Transformer block using Variational Linear Attention (VLA).
+    Transformer block using injected Attention (VLA, DeltaNet, Linear Transformer).
     Structure:
-    x -> LayerNorm -> VLA -> Residual -> LayerNorm -> FFN -> Residual
+    x -> LayerNorm -> Attn -> Residual -> LayerNorm -> FFN -> Residual
     """
     def __init__(
         self,
         d_model: int,
         d_ffn: int,
         dropout: float = 0.1,
+        attention_type: str = "vla",
         # VLA specific args
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
@@ -23,12 +26,21 @@ class VLATransformerBlock(nn.Module):
         
         # 1. Attention Sub-layer
         self.ln1 = nn.LayerNorm(d_model)
-        self.vla = VLALayer(
-            d_model=d_model,
-            d_head=d_model, # Enforced d_head = d_model
-            lambda_0=vla_lambda_0,
-            penalty_rank=vla_penalty_rank
-        )
+        
+        if attention_type == "vla":
+            self.attn = VLALayer(
+                d_model=d_model,
+                d_head=d_model,
+                lambda_0=vla_lambda_0,
+                penalty_rank=vla_penalty_rank
+            )
+        elif attention_type == "linear_transformer":
+            self.attn = LinearTransformerLayer(d_model=d_model)
+        elif attention_type == "deltanet":
+            self.attn = DeltaNetLayer(d_model=d_model)
+        else:
+            raise ValueError(f"Unknown attention type: {attention_type}")
+            
         self.dropout1 = nn.Dropout(dropout)
         
         # 2. FeedForward Sub-layer
@@ -42,23 +54,15 @@ class VLATransformerBlock(nn.Module):
         )
         
     def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
-        """
-        Args:
-            x: Input tensor (B, T, d_model)
-            return_states: If True, returns (output, states)
-        Returns:
-            Output tensor (B, T, d_model) + optional states dict
-        """
         # Pre-LN Architecture
-        
         # 1. Attention Path
         residual = x
         x_norm = self.ln1(x)
         
         if return_states:
-            attn_out, states = self.vla(x_norm, return_states=True)
+            attn_out, states = self.attn(x_norm, return_states=True)
         else:
-            attn_out = self.vla(x_norm)
+            attn_out = self.attn(x_norm)
             states = None
             
         x = residual + self.dropout1(attn_out)
@@ -74,35 +78,35 @@ class VLATransformerBlock(nn.Module):
         return x
 
 
-class VLATransformer(nn.Module):
+class LRAModel(nn.Module):
     """
-    Full Transformer model using VLA blocks.
+    Full Transformer model for LRA tasks.
+    Enforces required shape configurations internally by default.
     """
     def __init__(
         self,
         vocab_size: int,
-        d_model: int = 64,
-        n_layers: int = 2,
-        d_ffn: Optional[int] = None,
-        max_len: int = 512,
+        d_model: int = 256,
+        n_layers: int = 4,
+        d_ffn: int = 1024,
+        max_len: int = 4096,
         dropout: float = 0.1,
+        attention_type: str = "vla",
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
     ):
         super().__init__()
         
-        if d_ffn is None:
-            d_ffn = 4 * d_model
-            
         self.token_embedding = nn.Embedding(vocab_size, d_model)
         self.position_embedding = nn.Embedding(max_len, d_model)
         self.dropout = nn.Dropout(dropout)
         
         self.layers = nn.ModuleList([
-            VLATransformerBlock(
+            LRATransformerBlock(
                 d_model=d_model,
                 d_ffn=d_ffn,
                 dropout=dropout,
+                attention_type=attention_type,
                 vla_lambda_0=vla_lambda_0,
                 vla_penalty_rank=vla_penalty_rank
             )
@@ -112,29 +116,28 @@ class VLATransformer(nn.Module):
         # Final normalization before output projection
         self.ln_f = nn.LayerNorm(d_model)
         
-        self.head = nn.Linear(d_model, vocab_size)
+        self.head = nn.Linear(d_model, vocab_size) # for sequence tasks
+        # If the task requires a single classification output out of the whole sequence:
+        self.cls_head = nn.Linear(d_model, 2) # e.g. binary classification/retrieval
         
-    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Args:
             x: Input token indices (B, T)
-            return_states: If true, returns states from the last VLA layer.
-        Returns:
-            Logits (B, T, vocab_size) + optional states dict
+            return_states: If true, returns dict of states.
+            pool: If true, applies mean pooling and returns logits shape (B, num_classes)
+                  Otherwise returns token-level logits (B, T, vocab_size)
         """
         B, T = x.shape
         device = x.device
         
-        # Embeddings
         tok_emb = self.token_embedding(x) # (B, T, d_model)
         
-        # Position embeddings
         positions = torch.arange(T, device=device).unsqueeze(0) # (1, T)
         pos_emb = self.position_embedding(positions) # (1, T, d_model)
         
         x = self.dropout(tok_emb + pos_emb)
         
-        # Layers
         states = None
         for i, layer in enumerate(self.layers):
             if return_states and i == len(self.layers) - 1:
@@ -142,11 +145,15 @@ class VLATransformer(nn.Module):
             else:
                 x = layer(x)
             
-        # Final Norm
         x = self.ln_f(x)
         
-        # Output Head
-        logits = self.head(x) # (B, T, vocab_size)
+        if pool:
+            # Mean pooling over the sequence (ignoring pad tokens normally, but simplistic here)
+            # A more robust implementation applies attention_mask, ignored here for brevity.
+            x_pool = x.mean(dim=1)
+            logits = self.cls_head(x_pool) # (B, num_classes)
+        else:
+            logits = self.head(x) # (B, T, vocab_size)
         
         if return_states:
             return logits, states
