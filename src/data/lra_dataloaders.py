@@ -45,6 +45,12 @@ class LRADataset(Dataset):
             "labels": y
         }
 
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    import random
+    random.seed(worker_seed)
+
 def get_lra_dataloader(
     data_dir: str, 
     task: str, 
@@ -61,13 +67,6 @@ def get_lra_dataloader(
     g = torch.Generator()
     g.manual_seed(seed)
     
-    # Deterministic worker init
-    def seed_worker(worker_id):
-        worker_seed = torch.initial_seed() % 2**32
-        np.random.seed(worker_seed)
-        import random
-        random.seed(worker_seed)
-
     dataset = LRADataset(data_dir=data_dir, task=task, split=split)
     
     return DataLoader(

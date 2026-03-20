@@ -26,12 +26,16 @@ def train_worker(args):
         
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Task specific lengths and vocab
-    lengths = {"listops": 2000, "retrieval": 4096, "pathfinder": 1024}
-    vocabs = {"listops": 16, "retrieval": 256, "pathfinder": 256}
+    # Task specific lengths, vocabs, and classes
+    lengths = {"listops": 2000, "retrieval": 4096, "pathfinder": 1024, "cqa": 1024, "clutrr": 1024}
+    vocabs = {"listops": 16, "retrieval": 256, "pathfinder": 256, "cqa": 256, "clutrr": 256}
+    
+    # ListOps typically has 10 classes (0-9). CQA has 5. CLUTRR has 21 (v1). Pathfinder/Retrieval have 2.
+    classes = {"listops": 10, "retrieval": 2, "pathfinder": 2, "cqa": 5, "clutrr": 21}
     
     max_len = lengths[args.task]
     vocab_size = vocabs[args.task]
+    num_classes = classes[args.task]
     
     try:
         train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=32, seed=args.seed)
@@ -47,7 +51,8 @@ def train_worker(args):
         d_ffn=1024,
         max_len=max_len,
         dropout=0.1,
-        attention_type=args.model
+        attention_type=args.model,
+        num_classes=num_classes
     ).to(device)
     
     optimizer = optim.Adam(model.parameters(), lr=1e-3)

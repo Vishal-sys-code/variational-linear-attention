@@ -94,6 +94,7 @@ class LRAModel(nn.Module):
         attention_type: str = "vla",
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
+        num_classes: int = 2,
     ):
         super().__init__()
         
@@ -118,7 +119,7 @@ class LRAModel(nn.Module):
         
         self.head = nn.Linear(d_model, vocab_size) # for sequence tasks
         # If the task requires a single classification output out of the whole sequence:
-        self.cls_head = nn.Linear(d_model, 2) # e.g. binary classification/retrieval
+        self.cls_head = nn.Linear(d_model, num_classes) # default was 2
         
     def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """

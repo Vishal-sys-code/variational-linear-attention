@@ -3,3 +3,8 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+data/
+wandb/
+*.npy
+*.npz
+long-range-arena/

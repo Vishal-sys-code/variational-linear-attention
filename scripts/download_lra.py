@@ -136,7 +136,7 @@ def main():
     # We will try loading existing tfds datasets first
     datasets_fns = {
         "listops": ("lra_listops", preprocess_listops),
-        "retrieval": ("lra_retrieval", preprocess_retrieval),  # might be lra_aan or lra_retrieval
+        "retrieval": ("lra_retrieval", preprocess_retrieval),
         "pathfinder": ("lra_pathfinder", preprocess_pathfinder)
     }
 
@@ -145,19 +145,17 @@ def main():
     env = os.environ.copy()
     env["PYTHONPATH"] = f"{repo_dir.absolute()}:{env.get('PYTHONPATH', '')}"
     
-    # We will try to download sequentially
     import numpy as np
-    for task_name in datasets_fns.keys():
-        os.makedirs(data_dir / task_name, exist_ok=True)
+    import csv
 
     # Natively inject LRA repository to PYTHONPATH for the current script
     sys.path.insert(0, str(repo_dir.absolute()))
     
     # Try loading from the repo to register the builders
     try:
-        import lra_benchmarks.data.listops
-        import lra_benchmarks.data.retrieval
-        import lra_benchmarks.data.pathfinder
+        # Ignore import errors for lra_benchmarks as the TFDS builders are mostly broken/missing 
+        # in the official repo (e.g. retrieval doesn't exist, pathfinder has undefined globals).
+        pass
     except ImportError as e:
         print(f"Note on importing LRA modules: {e}")
 
@@ -167,24 +165,71 @@ def main():
             continue
             
         print(f"Processing {task_name}...")
-        try:
-            # We try standard variants of names for LRA
-            # In official LRA, datasets are often registered as e.g. 'lra_listops'
-            # If not found, we fallback to downloading using the scripts or manual loading.
-            builder = tfds.builder(tfds_name)
-            builder.download_and_prepare()
-            
-            for split in ['train', 'validation', 'test']:
-                print(f"  Generating split: {split}")
-                ds = builder.as_dataset(split=split)
-                inputs, labels = process_fn(ds)
+        
+        # Retrieval (AAN) and Pathfinder are no longer available in the official GCP buckets (403 Forbidden)
+        # and their TFDS builders are missing or broken in the repository.
+        if task_name in ['retrieval', 'pathfinder']:
+            print(f"Warning: The official dataset for '{task_name}' is no longer publicly accessible or its TFDS builder is broken.")
+            print("Skipping to avoid crashing. If you have the raw data, you can build it manually.\n")
+            continue
+
+        if task_name == "listops":
+            try:
+                # 1. Generate TSV files directly using the LRA raw data generator
+                print("  Generating raw listops TSVs via lra_benchmarks script (this will take a minute)...")
+                tsv_dir = data_dir / "listops" / "raw_tsv"
+                tsv_dir.mkdir(parents=True, exist_ok=True)
                 
-                np.save(data_dir / task_name / f"{split}_inputs.npy", inputs)
-                np.save(data_dir / task_name / f"{split}_labels.npy", labels)
+                # We call the python script natively
+                subprocess.run(
+                    [sys.executable, "-m", "lra_benchmarks.data.listops",
+                     f"--output_dir={tsv_dir.absolute()}",
+                     "--num_train_samples=96000",
+                     "--num_valid_samples=2000",
+                     "--num_test_samples=2000"],
+                    cwd=str(repo_dir.absolute()),
+                    env=env,
+                    check=True
+                )
                 
-        except Exception as e:
-            print(f"Failed to generate {task_name} via TFDS directly: {e}")
-            print("To manually fix: make sure LRA TFDS builders are available in PYTHONPATH.")
+                # 2. Process TSV into numpy arrays (char-level tokenization)
+                splits = {
+                    "train": tsv_dir / "basic_train.tsv",
+                    "validation": tsv_dir / "basic_val.tsv",
+                    "test": tsv_dir / "basic_test.tsv"
+                }
+                
+                for split_name, tsv_file in splits.items():
+                    print(f"  Tokenizing split: {split_name} from {tsv_file}...")
+                    inputs_list = []
+                    labels_list = []
+                    MAX_LEN = 2000
+                    
+                    with open(tsv_file, 'r', encoding='utf-8') as f:
+                        reader = csv.DictReader(f, delimiter='\t')
+                        for idx, row in enumerate(reader):
+                            src = row['Source']
+                            label = int(row['Target'])
+                            
+                            chars = [ord(c) for c in src if c != ' ']
+                            if len(chars) > MAX_LEN:
+                                chars = chars[:MAX_LEN]
+                            else:
+                                chars = chars + [0] * (MAX_LEN - len(chars))
+                                
+                            inputs_list.append(chars)
+                            labels_list.append(label)
+                            
+                    inputs_np = np.array(inputs_list, dtype=np.int32)
+                    labels_np = np.array(labels_list, dtype=np.int64)
+                    
+                    np.save(data_dir / task_name / f"{split_name}_inputs.npy", inputs_np)
+                    np.save(data_dir / task_name / f"{split_name}_labels.npy", labels_np)
+                    
+                print(f"Successfully generated {task_name}!\n")
+
+            except Exception as e:
+                print(f"Failed to generate {task_name} natively: {e}")
 
 if __name__ == "__main__":
     main()
