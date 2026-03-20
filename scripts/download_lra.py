@@ -146,12 +146,14 @@ def main():
     env["PYTHONPATH"] = f"{repo_dir.absolute()}:{env.get('PYTHONPATH', '')}"
     
     # We will try to download sequentially
-    # It might fail if we don't have exactly the right builders, but we will catch it and try direct TFDS loads
+    import numpy as np
     for task_name in datasets_fns.keys():
         os.makedirs(data_dir / task_name, exist_ok=True)
 
-    # Try directly with tfds if they exist in standard pip wheels, or load from the repo
-    import numpy as np
+    # Natively inject LRA repository to PYTHONPATH for the current script
+    sys.path.insert(0, str(repo_dir.absolute()))
+    
+    # Try loading from the repo to register the builders
     try:
         import lra_benchmarks.data.listops
         import lra_benchmarks.data.retrieval
