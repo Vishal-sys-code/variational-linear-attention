@@ -33,7 +33,8 @@ class DeltaNetLayer(nn.Module):
             x_t = x[:, t, :]
             
             q = self.W_q(x_t)
-            k = self.W_k(x_t)
+            # Normalizing keys is mathematically required for DeltaNet stability to bound eigenvalues
+            k = F.normalize(self.W_k(x_t), p=2, dim=-1)
             v = self.W_v(x_t)
             
             # (B, 1)
