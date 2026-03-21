@@ -27,8 +27,8 @@ def train_worker(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # Task specific lengths, vocabs, and classes
-    lengths = {"listops": 2000, "retrieval": 4096, "pathfinder": 1024, "cqa": 1024, "clutrr": 1024}
-    vocabs = {"listops": 16, "retrieval": 256, "pathfinder": 256, "cqa": 256, "clutrr": 256}
+    # ListOps chars (ASCII) map up to ~125 ('}'), so 256 covers all safely like other byte-level tasks
+    vocabs = {"listops": 256, "retrieval": 256, "pathfinder": 256, "cqa": 256, "clutrr": 256}
     
     # ListOps typically has 10 classes (0-9). CQA has 5. CLUTRR has 21 (v1). Pathfinder/Retrieval have 2.
     classes = {"listops": 10, "retrieval": 2, "pathfinder": 2, "cqa": 5, "clutrr": 21}
