@@ -2,7 +2,7 @@ import torch
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from src.models.transformer import VLATransformer
+from src.models.transformer import LRAModel
 
 def test_vla_math_regression_no_nans():
     """
@@ -13,11 +13,12 @@ def test_vla_math_regression_no_nans():
     d_model = 16
     n_layers = 1
     
-    model = VLATransformer(
+    model = LRAModel(
         vocab_size=vocab_size,
         d_model=d_model,
         n_layers=n_layers,
-        max_len=32
+        max_len=32,
+        attention_type="vla"
     )
     
     # 1 batch, 4 timesteps
