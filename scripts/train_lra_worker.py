@@ -40,8 +40,8 @@ def train_worker(args):
     num_classes = classes[args.task]
     
     try:
-        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=8, num_workers=2, seed=args.seed)
-        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=8, num_workers=2, seed=args.seed)
+        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=1, num_workers=2, seed=args.seed)
+        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=1, num_workers=2, seed=args.seed)
     except FileNotFoundError:
         print(f"Could not load data for {args.task}. Ensure download_lra.py has been run.")
         return
@@ -60,7 +60,7 @@ def train_worker(args):
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
     
-    accum_steps = 4
+    accum_steps = 32
     for epoch in range(1): # typically more depending on standard but limiting for default
         model.train()
         optimizer.zero_grad()
