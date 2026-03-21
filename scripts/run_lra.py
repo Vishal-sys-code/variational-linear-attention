@@ -8,7 +8,7 @@ def main():
     parser.add_argument("--tasks", nargs="+", default=["listops", "retrieval", "pathfinder"])
     parser.add_argument("--models", nargs="+", default=["linear_transformer", "deltanet", "vla"])
     parser.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2, 3, 4])
-    parser.add_argument("--parallel-seeds", action="store_true", default=True, help="Run seeds in parallel for each model/task pair")
+    parser.add_argument("--parallel-seeds", action="store_true", default=False, help="Run seeds in parallel for each model/task pair")
     
     args = parser.parse_args()
     
