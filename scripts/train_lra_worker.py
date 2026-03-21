@@ -40,8 +40,8 @@ def train_worker(args):
     num_classes = classes[args.task]
     
     try:
-        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=32, num_workers=2, seed=args.seed)
-        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=32, num_workers=2, seed=args.seed)
+        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=8, num_workers=2, seed=args.seed)
+        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=8, num_workers=2, seed=args.seed)
     except FileNotFoundError:
         print(f"Could not load data for {args.task}. Ensure download_lra.py has been run.")
         return
@@ -60,14 +60,14 @@ def train_worker(args):
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
     
+    accum_steps = 4
     for epoch in range(1): # typically more depending on standard but limiting for default
         model.train()
+        optimizer.zero_grad()
         for step, batch in enumerate(train_loader):
             ts = time.time()
             x = batch["input_ids"].to(device)
             y = batch["labels"].to(device)
-            
-            optimizer.zero_grad()
             
             # Request states for returning metrics every 100 steps if VLA
             return_states = (args.model == "vla" and step % 100 == 0)
@@ -84,10 +84,12 @@ def train_worker(args):
                 logits = output
                 
             loss = criterion(logits, y)
-            loss.backward()
+            (loss / accum_steps).backward()
             
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
+            if (step + 1) % accum_steps == 0 or (step + 1 == len(train_loader)):
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                optimizer.step()
+                optimizer.zero_grad()
             
             dur = time.time() - ts
             throughput = x.size(0) * x.size(1) / dur
