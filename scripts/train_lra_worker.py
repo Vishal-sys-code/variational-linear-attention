@@ -6,6 +6,7 @@ import torch.optim as optim
 import wandb
 import sys
 import os
+os.environ["WANDB_SILENT"] = "true"
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.models.transformer import LRAModel
@@ -39,8 +40,8 @@ def train_worker(args):
     num_classes = classes[args.task]
     
     try:
-        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=32, seed=args.seed)
-        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=32, seed=args.seed)
+        train_loader = get_lra_dataloader("data/lra", args.task, "train", batch_size=32, num_workers=2, seed=args.seed)
+        val_loader = get_lra_dataloader("data/lra", args.task, "validation", batch_size=32, num_workers=2, seed=args.seed)
     except FileNotFoundError:
         print(f"Could not load data for {args.task}. Ensure download_lra.py has been run.")
         return
