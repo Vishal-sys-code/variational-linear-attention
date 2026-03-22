@@ -95,8 +95,9 @@ def train_worker(args):
             throughput = x.size(0) * x.size(1) / dur
             
             if step % 50 == 0:
+                print(f"  [Step {step}/1000] Loss: {loss.item() * accum_steps:.4f} | Tok/s: {throughput:.0f} | VRAM: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
                 wandb.log({
-                    "train_loss": loss.item(),
+                    "train_loss": loss.item() * accum_steps,
                     "training_step_time": dur,
                     "tokens_per_second": throughput,
                     "gpu_memory_usage": torch.cuda.memory_allocated() / 1e9 if torch.cuda.is_available() else 0
