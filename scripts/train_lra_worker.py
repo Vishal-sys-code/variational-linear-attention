@@ -95,7 +95,7 @@ def train_worker(args):
             throughput = x.size(0) * x.size(1) / dur
             
             if step % 50 == 0:
-                print(f"  [Step {step}/1000] Loss: {loss.item() * accum_steps:.4f} | Tok/s: {throughput:.0f} | VRAM: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
+                print(f"  [Step {step}/100] Loss: {loss.item() * accum_steps:.4f} | Tok/s: {throughput:.0f} | VRAM: {torch.cuda.memory_allocated() / 1e9:.2f} GB")
                 wandb.log({
                     "train_loss": loss.item() * accum_steps,
                     "training_step_time": dur,
@@ -103,7 +103,7 @@ def train_worker(args):
                     "gpu_memory_usage": torch.cuda.memory_allocated() / 1e9 if torch.cuda.is_available() else 0
                 })
                 
-            if step >= 1000: # for testing early stopping. Real runs use epochs
+            if step >= 100: # for testing early stopping. Real runs use epochs
                 break
                 
         # Validation
