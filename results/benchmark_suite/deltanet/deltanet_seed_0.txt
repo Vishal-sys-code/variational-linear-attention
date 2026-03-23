@@ -1,0 +1,52 @@
+COMMAND:
+!python scripts/run_benchmark_suite.py --models deltanet --seeds 0
+
+
+RESULTS:
+============================================================
+      VLA UNIFIED BENCHMARK SUITE
+============================================================
+
+[PHASE 1] Executing LRA-style Reasoning and Structure Tasks
+Tasks: ['listops', 'cqa', 'clutrr']
+Starting execution of 3 LRA training runs...
+
+[1/3] Starting Task: listops | Model: deltanet with 1 seeds...
+  Executing Seed 0: /usr/bin/python3 scripts/train_lra_worker.py --task listops --model deltanet --seed 0
+cc  [Step 0/100] Loss: 73.1474 | Tok/s: 118 | VRAM: 0.05 GB
+  [Step 50/100] Loss: 92.2604 | Tok/s: 125 | VRAM: 0.08 GB
+  [Step 100/100] Loss: 110.4017 | Tok/s: 126 | VRAM: 0.08 GB
+Run listops-deltanet-seed0 finished. Val Acc: 0.0778
+
+[2/3] Starting Task: cqa | Model: deltanet with 1 seeds...
+  Executing Seed 0: /usr/bin/python3 scripts/train_lra_worker.py --task cqa --model deltanet --seed 0
+cc  [Step 0/100] Loss: 54.6630 | Tok/s: 131 | VRAM: 0.05 GB
+  [Step 50/100] Loss: 74.6146 | Tok/s: 118 | VRAM: 0.07 GB
+  [Step 100/100] Loss: 16.3508 | Tok/s: 132 | VRAM: 0.07 GB
+Run cqa-deltanet-seed0 finished. Val Acc: 0.1996
+
+[3/3] Starting Task: clutrr | Model: deltanet with 1 seeds...
+  Executing Seed 0: /usr/bin/python3 scripts/train_lra_worker.py --task clutrr --model deltanet --seed 0
+cc  [Step 0/100] Loss: 111.5788 | Tok/s: 117 | VRAM: 0.05 GB
+  [Step 50/100] Loss: 147.5451 | Tok/s: 127 | VRAM: 0.07 GB
+  [Step 100/100] Loss: 95.7580 | Tok/s: 115 | VRAM: 0.07 GB
+Run clutrr-deltanet-seed0 finished. Val Acc: 0.0559
+
+All LRA runs complete. Generate plots via scripts/analyze_lra.py
+[SUCCESS] Phase 1 completed.
+
+[PHASE 2] Executing Synthetic Memory Tasks
+=== Running tests/test_vla_math_regression.py ===
+CI test passed: No NaNs, finite condition numbers.
+=== Running scripts/run_copy_task.py ===
+Traceback (most recent call last):
+  File "/content/variational-linear-attention/scripts/run_copy_task.py", line 10, in <module>
+    from src.models.transformer import VLATransformer
+ImportError: cannot import name 'VLATransformer' from 'src.models.transformer' (/content/variational-linear-attention/src/models/transformer.py)
+!!! Error in scripts/run_copy_task.py. Stopping.
+=== All synthetic tasks finished ===
+[SUCCESS] Phase 2 completed.
+
+============================================================
+ BENCHMARK SUITE COMPLETE! View results in Weights & Biases
+============================================================
