@@ -1,0 +1,31 @@
+python scripts/smoke_test.py
+C:\Users\bisha\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\cuda\__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Running smoke test on cpu
+
+--- Testing linear_transformer ---
+Step 0: Loss = 0.7423
+Step 50: Loss = 0.6820
+Step 100: Loss = 0.6947
+Step 150: Loss = 0.6541
+Success! Initial Loss: 0.7423 -> Final Loss: 0.6925
+
+--- Testing deltanet ---
+Step 0: Loss = 0.6983
+Step 50: Loss = 0.6941
+Step 100: Loss = 0.6915
+Step 150: Loss = 0.6977
+Success! Initial Loss: 0.6983 -> Final Loss: 0.6993
+
+--- Testing vla ---
+Step 0: Loss = 0.6952
+Step 50: Loss = 0.7477
+Step 100: Loss = 0.6739
+Step 150: Loss = 0.6983
+Success! Initial Loss: 0.6952 -> Final Loss: 0.6729
+
+Smoke Test Summary:
+  linear_transformer: PASS
+  deltanet: PASS
+  vla: PASS
+All models passed smoke tests!
