@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from src.models.transformer import VLATransformer
+from src.models.transformer import LRAModel
 from src.benchmarks.synthetic.dataset import CopyTaskDataset
 from src.benchmarks.synthetic.metrics import PerformanceLogger, compute_survival_matrix
 import src.benchmarks.synthetic.plots as plots
@@ -48,11 +48,12 @@ def run_copy_task():
     dataset = CopyTaskDataset(num_samples=2000, seq_len=config["seq_len"], vocab_size=config["vocab_size"])
     loader = DataLoader(dataset, batch_size=config["batch_size"], shuffle=True)
     
-    model = VLATransformer(
+    model = LRAModel(
         vocab_size=config["vocab_size"],
         d_model=config["d_model"],
         n_layers=config["n_layers"],
-        max_len=config["seq_len"] + 10
+        max_len=config["seq_len"] + 10,
+        attention_type="vla"
     ).to(device)
     
     optimizer = torch.optim.AdamW(model.parameters(), lr=config["lr"])
@@ -87,7 +88,7 @@ def run_copy_task():
             return_states = (step % config["log_every_n_steps"] == 0)
             
             if return_states:
-                logits, states = model(x, return_states=True)
+                logits, states = model(x, pool=False, return_states=True)
                 # Compute diagnostic metrics
                 A_t = states["A"][0] # (T, d, d)
                 cond_vals = [torch.linalg.cond(a.to(torch.float64)).item() for a in A_t]
@@ -113,7 +114,7 @@ def run_copy_task():
                     
                 survival_trace = survival.cpu().numpy()
             else:
-                logits = model(x)
+                logits = model(x, pool=False)
                 current_cond = conds[-1] if conds else 0.0
                 current_norm = norms[-1] if norms else 0.0
                 
@@ -150,7 +151,7 @@ def run_copy_task():
     with torch.no_grad():
         for x, y in DataLoader(CopyTaskDataset(200, config["seq_len"], config["vocab_size"]), batch_size=32):
             x, y = x.to(device), y.to(device)
-            preds = model(x).argmax(dim=-1)
+            preds = model(x, pool=False).argmax(dim=-1)
             correct += (preds == y).sum().item()
             total += y.numel()
     acc = correct / total
