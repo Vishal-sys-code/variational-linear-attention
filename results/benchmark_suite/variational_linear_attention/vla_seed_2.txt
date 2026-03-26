@@ -1,0 +1,86 @@
+============================================================
+      VLA UNIFIED BENCHMARK SUITE
+============================================================
+
+[PHASE 1] Executing LRA-style Reasoning and Structure Tasks
+Tasks: ['listops']
+Starting execution of 1 LRA training runs...
+
+[1/1] Starting Task: listops | Model: vla with 1 seeds...
+  Executing Seed 2: /usr/bin/python3 scripts/train_lra_worker.py --task listops --model vla --seed 2
+cc  [Step 0/100] Loss: 36.5337 | Tok/s: 129 | VRAM: 0.06 GB
+  [Step 50/100] Loss: 41.4367 | Tok/s: 138 | VRAM: 0.09 GB
+  [Step 100/100] Loss: 38.2611 | Tok/s: 132 | VRAM: 0.09 GB
+  [Val Step 0/125] Running validation...
+  [Val Step 10/125] Running validation...
+  [Val Step 20/125] Running validation...
+  [Val Step 30/125] Running validation...
+Run listops-vla-seed2 finished. Val Acc: 0.1562
+
+All LRA runs complete. Generate plots via scripts/analyze_lra.py
+[SUCCESS] Phase 1 completed.
+
+[PHASE 2] Skipped Synthetic Memory Tasks.
+
+============================================================
+ BENCHMARK SUITE COMPLETE! View results in Weights & Biases
+============================================================
+
+
+============================================================
+      VLA UNIFIED BENCHMARK SUITE
+============================================================
+
+[PHASE 1] Executing LRA-style Reasoning and Structure Tasks
+Tasks: ['cqa']
+Starting execution of 1 LRA training runs...
+
+[1/1] Starting Task: cqa | Model: vla with 1 seeds...
+  Executing Seed 2: /usr/bin/python3 scripts/train_lra_worker.py --task cqa --model vla --seed 2
+cc  [Step 0/100] Loss: 22.5992 | Tok/s: 131 | VRAM: 0.06 GB
+  [Step 50/100] Loss: 28.6901 | Tok/s: 143 | VRAM: 0.09 GB
+  [Step 100/100] Loss: 28.1989 | Tok/s: 132 | VRAM: 0.09 GB
+  [Val Step 0/77] Running validation...
+  [Val Step 10/77] Running validation...
+  [Val Step 20/77] Running validation...
+  [Val Step 30/77] Running validation...
+Run cqa-vla-seed2 finished. Val Acc: 0.2148
+
+All LRA runs complete. Generate plots via scripts/analyze_lra.py
+[SUCCESS] Phase 1 completed.
+
+[PHASE 2] Skipped Synthetic Memory Tasks.
+
+============================================================
+ BENCHMARK SUITE COMPLETE! View results in Weights & Biases
+============================================================
+
+
+============================================================
+      VLA UNIFIED BENCHMARK SUITE
+============================================================
+
+[PHASE 1] Executing LRA-style Reasoning and Structure Tasks
+Tasks: ['clutrr']
+Starting execution of 1 LRA training runs...
+
+[1/1] Starting Task: clutrr | Model: vla with 1 seeds...
+  Executing Seed 2: /usr/bin/python3 scripts/train_lra_worker.py --task clutrr --model vla --seed 2
+cc  [Step 0/100] Loss: 52.5321 | Tok/s: 124 | VRAM: 0.06 GB
+  [Step 50/100] Loss: 48.4060 | Tok/s: 138 | VRAM: 0.09 GB
+  [Step 100/100] Loss: 44.2132 | Tok/s: 130 | VRAM: 0.09 GB
+  [Val Step 0/4415] Running validation...
+  [Val Step 10/4415] Running validation...
+  [Val Step 20/4415] Running validation...
+  [Val Step 30/4415] Running validation...
+Run clutrr-vla-seed2 finished. Val Acc: 0.0879
+
+All LRA runs complete. Generate plots via scripts/analyze_lra.py
+[SUCCESS] Phase 1 completed.
+
+[PHASE 2] Skipped Synthetic Memory Tasks.
+
+============================================================
+ BENCHMARK SUITE COMPLETE! View results in Weights & Biases
+============================================================
+
