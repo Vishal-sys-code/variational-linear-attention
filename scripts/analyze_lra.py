@@ -1,95 +1,106 @@
 import os
-import argparse
+import glob
+import re
 import numpy as np
-from scipy import stats
-import wandb
 import matplotlib.pyplot as plt
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--wandb-project", type=str, default="variational-linear-attention")
-    parser.add_argument("--entity", type=str, default="vla-research")
-    parser.add_argument("--output-dir", type=str, default="results")
-    args = parser.parse_args()
+    base_dir = "results/benchmark_suite"
     
-    os.makedirs(args.output_dir, exist_ok=True)
+    if not os.path.exists(base_dir):
+        print(f"Error: Directory {base_dir} does not exist.")
+        return
+        
+    tasks = ["listops", "cqa", "clutrr"]
+    # Model folder names to actual model string names used in logs
+    models = ["linear_transformer", "deltanet", "vla"]
     
-    print("WARNING: This script parses wandb runs. In offline or mock dev mode, results may be empty.")
-    try:
-        api = wandb.Api()
-        runs = api.runs(f"{args.entity}/{args.wandb_project}")
-    except Exception as e:
-        print(f"Could not connect to wandb: {e}")
-        runs = []
-    
-    # We aggregate runs by task and model
-    # run.name is standard format: task-model-seedX
-    # We want mean +/- std across 5 seeds
-    
-    # Structure: results[task][model] = [list of validation accuracies]
+    # results[task][model] = [acc1, acc2, acc3]
     results = {
-        "listops": {"linear_transformer": [], "deltanet": [], "vla": []},
-        "retrieval": {"linear_transformer": [], "deltanet": [], "vla": []},
-        "pathfinder": {"linear_transformer": [], "deltanet": [], "vla": []}
+        task: {model: [] for model in models}
+        for task in tasks
     }
     
-    for run in runs:
-        if run.state == "finished":
-            name = run.name
-            parts = name.split("-")
-            if len(parts) >= 3:
-                task = parts[0]
-                model = parts[1]
-                # last val accurate extracted
-                hist = run.history()
-                if "validation_accuracy" in hist.columns:
-                    acc = hist["validation_accuracy"].dropna().tolist()
-                    if acc:
-                        results[task][model].append(acc[-1])
-                        
-    # 1. Print Results Table
-    print("\n--- Final Metrics (Mean ± Std) ---")
-    models = ["linear_transformer", "deltanet", "vla"]
-    tasks = ["listops", "retrieval", "pathfinder"]
+    # Regex to match: "Run listops-vla-seed1 finished. Val Acc: 0.1543"
+    pattern = re.compile(r"Run\s+([a-zA-Z0-9_]+)-([a-zA-Z0-9_]+)-seed\d+\s+finished\.\s+Val Acc:\s+([\d.]+)")
     
-    header = f"{'Model':<20} | " + " | ".join([f"{t:<15}" for t in tasks])
-    print(header)
-    print("-" * len(header))
+    # Recursively find all txt files
+    txt_files = glob.glob(os.path.join(base_dir, "**", "*.txt"), recursive=True)
     
-    for model in models:
-        row = f"{model:<20} | "
-        for task in tasks:
+    print(f"Found {len(txt_files)} log files. Parsing...\n")
+    
+    for filepath in txt_files:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+            # Find all matching accuracies in this file
+            matches = pattern.findall(content)
+            for task_match, model_match, acc_str in matches:
+                task = task_match.lower()
+                model = model_match.lower()
+                acc = float(acc_str)
+                
+                if task in results and model in results[task]:
+                    results[task][model].append(acc)
+    
+    # Calculate Mean and Std
+    print("=" * 60)
+    print(f"{'Task':<12} | {'Model':<20} | {'Seed Count':<10} | {'Val Acc (%)'}")
+    print("-" * 60)
+    
+    plot_data = {task: {} for task in tasks}
+    
+    for task in tasks:
+        for model in models:
             accs = results[task][model]
             if len(accs) > 0:
-                mean_acc = np.mean(accs) * 100
-                std_acc = np.std(accs) * 100
-                row += f"{mean_acc:.1f} ± {std_acc:.1f}{'':<5} | "
+                accs_pct = [a * 100 for a in accs]
+                mean_acc = np.mean(accs_pct)
+                std_acc = np.std(accs_pct)
+                plot_data[task][model] = (mean_acc, std_acc)
+                print(f"{task:<12} | {model:<20} | {len(accs):<10} | {mean_acc:.2f} ± {std_acc:.2f}%")
             else:
-                row += f"{'N/A':<15} | "
-        print(row)
-        
-    print("\n--- Statistical Significance Test (VLA vs DeltaNet) ---")
-    for task in tasks:
-        vla_accs = results[task]["vla"]
-        delta_accs = results[task]["deltanet"]
-        
-        if len(vla_accs) > 1 and len(delta_accs) > 1 and len(vla_accs) == len(delta_accs):
-            t_stat, p_value = stats.ttest_rel(vla_accs, delta_accs)
-            print(f"Task {task}: p-value = {p_value:.4f} " + ("(Significant)" if p_value < 0.05 else "(Not Significant)"))
-        else:
-            print(f"Task {task}: Not enough matched data points for paired t-test.")
-            
-    # Mock generating plots for requested figures
-    print("\nGenerating Plots...")
-    fig, ax = plt.subplots()
-    ax.plot([1,2,3], [0.8, 0.4, 0.2], label="Linear")
-    ax.plot([1,2,3], [0.7, 0.3, 0.1], label="DeltaNet")
-    ax.plot([1,2,3], [0.9, 0.2, 0.05], label="VLA")
-    ax.set_title("Training Loss vs Step (Mock)")
-    ax.legend()
-    fig.savefig(f"{args.output_dir}/training_loss_curves.png")
+                plot_data[task][model] = (0.0, 0.0)
+                print(f"{task:<12} | {model:<20} | {0:<10} | N/A")
+                
+    print("=" * 60)
     
-    print(f"Plots saved to {args.output_dir}/")
+    # Generate Bar Chart
+    print("\nGenerating comparative bar chart...")
+    
+    x = np.arange(len(tasks))
+    width = 0.25
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Define colors
+    colors = {
+        "linear_transformer": "#1f77b4", # blue
+        "deltanet": "#ff7f0e",           # orange
+        "vla": "#2ca02c"                 # green
+    }
+    
+    for i, model in enumerate(models):
+        means = [plot_data[task][model][0] for task in tasks]
+        stds = [plot_data[task][model][1] for task in tasks]
+        
+        # Calculate offset for grouped bars
+        offset = (i - 1) * width 
+        
+        ax.bar(x + offset, means, width, yerr=stds, label=model, color=colors[model], capsize=5, alpha=0.9)
+    
+    ax.set_ylabel('Validation Accuracy (%)', fontsize=12)
+    ax.set_title('LRA Benchmark Suite Results by Model', fontsize=14, pad=15)
+    ax.set_xticks(x)
+    ax.set_xticklabels([t.upper() for t in tasks], fontsize=11)
+    ax.legend(title="Architecture", fontsize=10)
+    ax.set_ylim(0, max(100, ax.get_ylim()[1])) # Scale up to 100% or slightly above max
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    plt.tight_layout()
+    
+    plot_path = os.path.join(base_dir, "lra_accuracy_comparison.png")
+    plt.savefig(plot_path, dpi=300)
+    print(f"Chart successfully saved to: {plot_path}")
 
 if __name__ == "__main__":
     main()
