@@ -5,6 +5,7 @@ from typing import Optional, Tuple, List
 from src.models.attention.inverse_penalty import InversePenaltyTracker
 from src.models.attention.memory_matrix import MemoryMatrixManager
 from src.models.attention.penalty_builder import PenaltyBuilder
+from src.models.attention.symbolic_penalty import SymbolicPenaltyTracker
 
 
 class VLALayer(nn.Module):
@@ -18,6 +19,7 @@ class VLALayer(nn.Module):
         d_head: Optional[int] = None,
         lambda_0: float = 1.0,
         penalty_rank: int = 1,
+        gamma: float = 0.0,
         chunk_size: int = 1,  # Not used in token-by-token, but for future compatibility
     ):
         super().__init__()
@@ -55,14 +57,20 @@ class VLALayer(nn.Module):
             d_model=self.d_head,
             enable_renorm=False  # Default per spec (implied standard behavior unless specified)
         )
+        
+        self.symbolic_tracker = SymbolicPenaltyTracker(
+            d_model=self.d_head,
+            gamma=gamma
+        )
 
-    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Forward pass for VLA layer.
         
         Args:
             x: Input tensor of shape (B, T, d_model).
             return_states: If True, returns a tuple (O, states) with diagnostic states.
+            symbolic_adj: Optional shape (B, T, T) adjacency matrix.
             
         Returns:
             Output tensor of shape (B, T, d_model), optionally with states dict.
@@ -76,6 +84,11 @@ class VLALayer(nn.Module):
         self.inverse_tracker.init(batch_size=B, device=device, dtype=torch.float32)
         # S_0 = 0
         self.memory_manager.reset(batch_size=B, device=device, dtype=torch.float32)
+        
+        # Init symbolic tracker
+        self.symbolic_tracker.init_sequence(
+            A_rel=symbolic_adj, batch_size=B, max_seq_len=T, device=device, dtype=torch.float32
+        )
 
         outputs = []
         if return_states:
@@ -102,6 +115,15 @@ class VLALayer(nn.Module):
             # Step 4.4: Update A_t using u_t
             # We use the existing tracker which updates A_t internally.
             self.inverse_tracker.update(u_t)
+            
+            # Step 4.4b: Update A_t using symbolic relations if provided
+            a_t_scaled = self.symbolic_tracker.step(k_t, t)
+            if a_t_scaled is not None:
+                # Need to handle case where mask zeroed out batch elements without relations
+                # InverseTracker applies Sherman-Morrison for the whole batch. If a_t is 0 for some
+                # the update is 0 since outer product is 0.
+                self.inverse_tracker.update(a_t_scaled)
+                
             A_t = self.inverse_tracker.get()  # (B, d_head, d_head)
 
             # Step 4.5: Compute alpha_t
