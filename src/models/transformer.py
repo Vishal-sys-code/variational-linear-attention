@@ -21,6 +21,7 @@ class LRATransformerBlock(nn.Module):
         # VLA specific args
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
+        vla_gamma: float = 0.0,
     ):
         super().__init__()
         
@@ -32,7 +33,8 @@ class LRATransformerBlock(nn.Module):
                 d_model=d_model,
                 d_head=d_model,
                 lambda_0=vla_lambda_0,
-                penalty_rank=vla_penalty_rank
+                penalty_rank=vla_penalty_rank,
+                gamma=vla_gamma
             )
         elif attention_type == "linear_transformer":
             self.attn = LinearTransformerLayer(d_model=d_model)
@@ -53,16 +55,25 @@ class LRATransformerBlock(nn.Module):
             nn.Dropout(dropout)
         )
         
-    def forward(self, x: torch.Tensor, return_states: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         # Pre-LN Architecture
         # 1. Attention Path
         residual = x
         x_norm = self.ln1(x)
         
+        # Check if attention is VLA which supports symbolic_adj
+        is_vla = hasattr(self.attn, 'symbolic_tracker')
+        
         if return_states:
-            attn_out, states = self.attn(x_norm, return_states=True)
+            if is_vla:
+                attn_out, states = self.attn(x_norm, return_states=True, symbolic_adj=symbolic_adj)
+            else:
+                attn_out, states = self.attn(x_norm, return_states=True)
         else:
-            attn_out = self.attn(x_norm)
+            if is_vla:
+                attn_out = self.attn(x_norm, symbolic_adj=symbolic_adj)
+            else:
+                attn_out = self.attn(x_norm)
             states = None
             
         x = residual + self.dropout1(attn_out)
@@ -94,6 +105,7 @@ class LRAModel(nn.Module):
         attention_type: str = "vla",
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
+        vla_gamma: float = 0.0,
         num_classes: int = 2,
     ):
         super().__init__()
@@ -109,7 +121,8 @@ class LRAModel(nn.Module):
                 dropout=dropout,
                 attention_type=attention_type,
                 vla_lambda_0=vla_lambda_0,
-                vla_penalty_rank=vla_penalty_rank
+                vla_penalty_rank=vla_penalty_rank,
+                vla_gamma=vla_gamma
             )
             for _ in range(n_layers)
         ])
@@ -121,13 +134,14 @@ class LRAModel(nn.Module):
         # If the task requires a single classification output out of the whole sequence:
         self.cls_head = nn.Linear(d_model, num_classes) # default was 2
         
-    def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Args:
             x: Input token indices (B, T)
             return_states: If true, returns dict of states.
             pool: If true, applies mean pooling and returns logits shape (B, num_classes)
                   Otherwise returns token-level logits (B, T, vocab_size)
+            symbolic_adj: (B, T, T) relations matrix
         """
         B, T = x.shape
         device = x.device
@@ -142,9 +156,9 @@ class LRAModel(nn.Module):
         states = None
         for i, layer in enumerate(self.layers):
             if return_states and i == len(self.layers) - 1:
-                x, states = layer(x, return_states=True)
+                x, states = layer(x, return_states=True, symbolic_adj=symbolic_adj)
             else:
-                x = layer(x)
+                x = layer(x, symbolic_adj=symbolic_adj)
             
         x = self.ln_f(x)
         
