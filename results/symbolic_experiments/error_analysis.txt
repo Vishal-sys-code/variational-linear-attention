@@ -1,0 +1,5 @@
+Symbolic Reasoning Error Analysis
+=================================
+Final Val Acc Baseline: 60.0%
+Final Val Acc Symbolic: 60.0%
+Symbolic penalty improved or maintained reasoning accuracy while enforcing structures.
