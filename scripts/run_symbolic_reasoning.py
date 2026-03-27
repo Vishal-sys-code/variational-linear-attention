@@ -99,8 +99,8 @@ def run_symbolic_reasoning():
         "vocab_size": 35,
         "d_model": 64,
         "n_layers": 2,
-        "batch_size": 16,
-        "epochs": 3,
+        "batch_size": 32,
+        "epochs": 100,
         "lr": 5e-4
     }
     
@@ -110,9 +110,9 @@ def run_symbolic_reasoning():
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Small datasets to keep test fast
-    train_dataset = SymbolicReasoningDataset(num_samples=100, num_facts=4)
-    val_dataset = SymbolicReasoningDataset(num_samples=20, num_facts=4)
+    # Scaled datasets for robust Colab GPU training logic
+    train_dataset = SymbolicReasoningDataset(num_samples=2000, num_facts=4)
+    val_dataset = SymbolicReasoningDataset(num_samples=400, num_facts=4)
     
     train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=True, collate_fn=collate_fn_symbolic)
     val_loader = DataLoader(val_dataset, batch_size=config["batch_size"], shuffle=False, collate_fn=collate_fn_symbolic)
