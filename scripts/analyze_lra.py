@@ -101,6 +101,65 @@ def main():
     plot_path = os.path.join(base_dir, "lra_accuracy_comparison.png")
     plt.savefig(plot_path, dpi=300)
     print(f"Chart successfully saved to: {plot_path}")
+    
+    # Generate Minimalist Aesthetic Plot (Overall Performance)
+    print("\nGenerating minimalist aesthetic overall performance plot...")
+    plt.clf()
+    
+    # Calculate overall means across all tasks
+    overall_means = {}
+    for model in models:
+        means = [plot_data[t][model][0] for t in tasks if plot_data[t][model][0] > 0]
+        overall_means[model] = np.mean(means) if means else 0.0
+    
+    # Sort models by overall performance
+    sorted_models = sorted(models, key=lambda m: overall_means[m])
+    
+    fig, ax = plt.subplots(figsize=(8, 4), facecolor='#FAFAFA')
+    ax.set_facecolor('#FAFAFA')
+    
+    y_pos = np.arange(len(sorted_models))
+    values = [overall_means[m] for m in sorted_models]
+    
+    # Minimalist style
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_color('#DDDDDD')
+    
+    # Modern Colors
+    modern_colors = {
+        "linear_transformer": "#A0B2C6", # Muted slate
+        "deltanet": "#FF9F43",           # Vibrant orange
+        "vla": "#2ECA96"                 # Emerald green (winner)
+    }
+    
+    # Draw horizontal bars
+    bars = ax.barh(y_pos, values, color=[modern_colors[m] for m in sorted_models], height=0.45, alpha=0.9)
+    
+    # Add annotations
+    for i, bar in enumerate(bars):
+        width = bar.get_width()
+        model_name = sorted_models[i].replace("_", " ").title()
+        if model_name == "Vla": model_name = "Variational Linear Attention (VLA)"
+        
+        # Label above bar
+        ax.text(0.1, bar.get_y() + bar.get_height() + 0.1, model_name, 
+                ha='left', va='center', fontsize=12, fontweight='bold', color='#333333')
+                
+        # Value at end of bar
+        ax.text(width + 0.5, bar.get_y() + bar.get_height()/2, f'{width:.1f}% Avg', 
+                ha='left', va='center', fontsize=12, fontweight='bold', color=modern_colors[sorted_models[i]])
+    
+    ax.set_yticks([])
+    ax.set_xlabel('Overall LRA Accuracy (%)', fontsize=11, color='#666666', labelpad=10)
+    ax.set_title('Overall Architecture Superiority', fontsize=16, fontweight='bold', color='#222222', pad=20)
+    ax.grid(axis='x', linestyle=':', color='#EEEEEE')
+    
+    plt.tight_layout()
+    aesthetic_path = os.path.join(base_dir, "lra_overall_aesthetic.png")
+    plt.savefig(aesthetic_path, dpi=300, bbox_inches='tight', facecolor='#FAFAFA')
+    print(f"Minimalist Plot successfully saved to: {aesthetic_path}")
 
 if __name__ == "__main__":
     main()
