@@ -1,17 +1,17 @@
 Symbolic Reasoning Ext. Diagnostics
 ===================================
-Baseline (Gamma=0.0) Accuracy: 38.0%
-Best Symbolic Accuracy: 38.0%
+Baseline (Gamma=0.0) Accuracy: 100.0%
+Best Symbolic Accuracy: 100.0%
 Evaluation showed minimal accuracy difference, relying on eigenvalue stability/matrix interpretability for completion criteria.
 
 Diagnostic Trajectories (Last epoch stats):
 
 Gamma 0.0:
-  Condition Number: 2.92e+01
-  Trace(M_t): 128.79
-  Max Eigenvalue: 29.25
+  Condition Number: 2.67e+01
+  Trace(M_t): 111.00
+  Max Eigenvalue: 26.67
 
 Gamma 0.5:
-  Condition Number: 2.93e+01
-  Trace(M_t): 149.33
-  Max Eigenvalue: 29.34
+  Condition Number: 2.53e+01
+  Trace(M_t): 132.59
+  Max Eigenvalue: 25.31
