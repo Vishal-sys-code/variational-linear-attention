@@ -92,7 +92,7 @@ class VLALayer(nn.Module):
 
         outputs = []
         if return_states:
-            states = {"A": [], "S_norm": [], "q": [], "v": [], "alpha": []}
+            states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": []}
 
         # Iterate over tokens
         for t in range(T):
@@ -170,8 +170,14 @@ class VLALayer(nn.Module):
                 S_t = self.memory_manager.get_S()
                 states["S_norm"].append(torch.norm(S_t, p='fro', dim=(1,2)).clone().detach().cpu())
                 states["q"].append(q_t.clone().detach().cpu())
+                states["k"].append(k_t.clone().detach().cpu())
                 states["v"].append(v_t.clone().detach().cpu())
                 states["alpha"].append(alpha_t.clone().detach().cpu())
+                states["lambda_t"].append(lambda_t.clone().detach().cpu())
+                if a_t_scaled is not None:
+                    states["a_t_scaled"].append(a_t_scaled.clone().detach().cpu())
+                else:
+                    states["a_t_scaled"].append(torch.zeros_like(k_t).cpu())
 
         # Step 5: Stack outputs
         O = torch.stack(outputs, dim=1)  # (B, T, d_head)
