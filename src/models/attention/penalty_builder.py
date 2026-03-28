@@ -18,12 +18,14 @@ class PenaltyBuilder(nn.Module):
         hidden_dim: Optional[int] = None,
         lambda_min: float = 1e-4,
         use_separate_projections: bool = False,
+        fixed_lambda: Optional[float] = None,
     ):
         super().__init__()
         self.d_model = d_model
         self.rank = rank
         self.lambda_min = lambda_min
         self.use_separate_projections = use_separate_projections
+        self.fixed_lambda = fixed_lambda
 
         h = hidden_dim if hidden_dim is not None else 4 * d_model
 
@@ -51,9 +53,12 @@ class PenaltyBuilder(nn.Module):
                        (..., rank, d_model) if rank>1
             stats    : dict
         """
-        lambda_raw = self.lambda_net(k)
-        lambda_t = F.softplus(lambda_raw)
-        lambda_t = torch.clamp(lambda_t, min=self.lambda_min)
+        if self.fixed_lambda is not None:
+            lambda_t = torch.full((k.size()[:-1] + (1,)), self.fixed_lambda, device=k.device, dtype=k.dtype)
+        else:
+            lambda_raw = self.lambda_net(k)
+            lambda_t = F.softplus(lambda_raw)
+            lambda_t = torch.clamp(lambda_t, min=self.lambda_min)
 
         if self.use_separate_projections:
             proj_list = [layer(k) for layer in self.u_projections]
