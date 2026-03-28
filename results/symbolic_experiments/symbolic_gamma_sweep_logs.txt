@@ -1,15 +1,14 @@
-/content/variational-linear-attention/scripts/run_symbolic_gamma_sweep.py:168: SyntaxWarning: invalid escape sequence '\g'
-  plt.plot(results[str(g)]["train_loss"], label=f'$\gamma={g}$')
-/content/variational-linear-attention/scripts/run_symbolic_gamma_sweep.py:176: SyntaxWarning: invalid escape sequence '\g'
-  plt.plot(results[str(g)]["val_acc"], label=f'$\gamma={g}$')
-/content/variational-linear-attention/scripts/run_symbolic_gamma_sweep.py:189: SyntaxWarning: invalid escape sequence '\g'
-  plt.plot(eigs[::-1], label=f'$\gamma={g}$', marker='.')
 Using device: cuda
+Dataset not found at data/symbolic_reasoning/train.pt. Generating now...
+Generating train set (5000)...
+Generating val set (1000)...
+Generating test set (1000)...
+Dataset generation complete.
 
 Training Model with gamma = 0.0
-Gamma 0.00 | Epoch 01 | Loss: 0.9442 | Acc: 100.0%
-Gamma 0.00 | Epoch 02 | Loss: 0.0891 | Acc: 100.0%
-Gamma 0.00 | Epoch 03 | Loss: 0.0393 | Acc: 100.0%
+Gamma 0.00 | Epoch 01 | Loss: 0.9465 | Acc: 100.0%
+Gamma 0.00 | Epoch 02 | Loss: 0.0884 | Acc: 100.0%
+Gamma 0.00 | Epoch 03 | Loss: 0.0395 | Acc: 100.0%
 Gamma 0.00 | Epoch 04 | Loss: 0.0229 | Acc: 100.0%
 Gamma 0.00 | Epoch 05 | Loss: 0.0152 | Acc: 100.0%
 Gamma 0.00 | Epoch 06 | Loss: 0.0110 | Acc: 100.0%
@@ -20,7 +19,7 @@ Gamma 0.00 | Epoch 10 | Loss: 0.0044 | Acc: 100.0%
 Gamma 0.00 | Epoch 11 | Loss: 0.0037 | Acc: 100.0%
 Gamma 0.00 | Epoch 12 | Loss: 0.0031 | Acc: 100.0%
 Gamma 0.00 | Epoch 13 | Loss: 0.0027 | Acc: 100.0%
-Gamma 0.00 | Epoch 14 | Loss: 0.0024 | Acc: 100.0%
+Gamma 0.00 | Epoch 14 | Loss: 0.0023 | Acc: 100.0%
 Gamma 0.00 | Epoch 15 | Loss: 0.0021 | Acc: 100.0%
 Gamma 0.00 | Epoch 16 | Loss: 0.0018 | Acc: 100.0%
 Gamma 0.00 | Epoch 17 | Loss: 0.0016 | Acc: 100.0%
@@ -33,7 +32,7 @@ Gamma 0.00 | Epoch 23 | Loss: 0.0009 | Acc: 100.0%
 Gamma 0.00 | Epoch 24 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.00 | Epoch 25 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.00 | Epoch 26 | Loss: 0.0007 | Acc: 100.0%
-Gamma 0.00 | Epoch 27 | Loss: 0.0007 | Acc: 100.0%
+Gamma 0.00 | Epoch 27 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.00 | Epoch 28 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.00 | Epoch 29 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.00 | Epoch 30 | Loss: 0.0005 | Acc: 100.0%
@@ -42,7 +41,7 @@ Gamma 0.00 | Epoch 32 | Loss: 0.0005 | Acc: 100.0%
 Gamma 0.00 | Epoch 33 | Loss: 0.0004 | Acc: 100.0%
 Gamma 0.00 | Epoch 34 | Loss: 0.0004 | Acc: 100.0%
 Gamma 0.00 | Epoch 35 | Loss: 0.0004 | Acc: 100.0%
-Gamma 0.00 | Epoch 36 | Loss: 0.0004 | Acc: 100.0%
+Gamma 0.00 | Epoch 36 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.00 | Epoch 37 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.00 | Epoch 38 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.00 | Epoch 39 | Loss: 0.0003 | Acc: 100.0%
@@ -57,7 +56,7 @@ Gamma 0.00 | Epoch 47 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.00 | Epoch 48 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.00 | Epoch 49 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.00 | Epoch 50 | Loss: 0.0002 | Acc: 100.0%
-Gamma 0.00 | Epoch 51 | Loss: 0.0002 | Acc: 100.0%
+Gamma 0.00 | Epoch 51 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.00 | Epoch 52 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.00 | Epoch 53 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.00 | Epoch 54 | Loss: 0.0001 | Acc: 100.0%
@@ -109,9 +108,9 @@ Gamma 0.00 | Epoch 99 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.00 | Epoch 100 | Loss: 0.0000 | Acc: 100.0%
 
 Training Model with gamma = 0.05
-Gamma 0.05 | Epoch 01 | Loss: 0.9458 | Acc: 100.0%
-Gamma 0.05 | Epoch 02 | Loss: 0.0891 | Acc: 100.0%
-Gamma 0.05 | Epoch 03 | Loss: 0.0393 | Acc: 100.0%
+Gamma 0.05 | Epoch 01 | Loss: 0.9481 | Acc: 100.0%
+Gamma 0.05 | Epoch 02 | Loss: 0.0885 | Acc: 100.0%
+Gamma 0.05 | Epoch 03 | Loss: 0.0395 | Acc: 100.0%
 Gamma 0.05 | Epoch 04 | Loss: 0.0229 | Acc: 100.0%
 Gamma 0.05 | Epoch 05 | Loss: 0.0153 | Acc: 100.0%
 Gamma 0.05 | Epoch 06 | Loss: 0.0110 | Acc: 100.0%
@@ -135,7 +134,7 @@ Gamma 0.05 | Epoch 23 | Loss: 0.0009 | Acc: 100.0%
 Gamma 0.05 | Epoch 24 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.05 | Epoch 25 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.05 | Epoch 26 | Loss: 0.0007 | Acc: 100.0%
-Gamma 0.05 | Epoch 27 | Loss: 0.0007 | Acc: 100.0%
+Gamma 0.05 | Epoch 27 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.05 | Epoch 28 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.05 | Epoch 29 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.05 | Epoch 30 | Loss: 0.0005 | Acc: 100.0%
@@ -144,7 +143,7 @@ Gamma 0.05 | Epoch 32 | Loss: 0.0005 | Acc: 100.0%
 Gamma 0.05 | Epoch 33 | Loss: 0.0004 | Acc: 100.0%
 Gamma 0.05 | Epoch 34 | Loss: 0.0004 | Acc: 100.0%
 Gamma 0.05 | Epoch 35 | Loss: 0.0004 | Acc: 100.0%
-Gamma 0.05 | Epoch 36 | Loss: 0.0004 | Acc: 100.0%
+Gamma 0.05 | Epoch 36 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.05 | Epoch 37 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.05 | Epoch 38 | Loss: 0.0003 | Acc: 100.0%
 Gamma 0.05 | Epoch 39 | Loss: 0.0003 | Acc: 100.0%
@@ -159,7 +158,7 @@ Gamma 0.05 | Epoch 47 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.05 | Epoch 48 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.05 | Epoch 49 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.05 | Epoch 50 | Loss: 0.0002 | Acc: 100.0%
-Gamma 0.05 | Epoch 51 | Loss: 0.0002 | Acc: 100.0%
+Gamma 0.05 | Epoch 51 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.05 | Epoch 52 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.05 | Epoch 53 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.05 | Epoch 54 | Loss: 0.0001 | Acc: 100.0%
@@ -188,11 +187,11 @@ Gamma 0.05 | Epoch 76 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 77 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 78 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 79 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.05 | Epoch 80 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.05 | Epoch 81 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.05 | Epoch 82 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.05 | Epoch 83 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.05 | Epoch 84 | Loss: 0.0000 | Acc: 100.0%
+Gamma 0.05 | Epoch 80 | Loss: 0.0017 | Acc: 100.0%
+Gamma 0.05 | Epoch 81 | Loss: 0.0001 | Acc: 100.0%
+Gamma 0.05 | Epoch 82 | Loss: 0.0001 | Acc: 100.0%
+Gamma 0.05 | Epoch 83 | Loss: 0.0001 | Acc: 100.0%
+Gamma 0.05 | Epoch 84 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.05 | Epoch 85 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 86 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 87 | Loss: 0.0000 | Acc: 100.0%
@@ -211,13 +210,13 @@ Gamma 0.05 | Epoch 99 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.05 | Epoch 100 | Loss: 0.0000 | Acc: 100.0%
 
 Training Model with gamma = 0.1
-Gamma 0.10 | Epoch 01 | Loss: 0.9466 | Acc: 100.0%
-Gamma 0.10 | Epoch 02 | Loss: 0.0891 | Acc: 100.0%
-Gamma 0.10 | Epoch 03 | Loss: 0.0393 | Acc: 100.0%
-Gamma 0.10 | Epoch 04 | Loss: 0.0229 | Acc: 100.0%
+Gamma 0.10 | Epoch 01 | Loss: 0.9488 | Acc: 100.0%
+Gamma 0.10 | Epoch 02 | Loss: 0.0886 | Acc: 100.0%
+Gamma 0.10 | Epoch 03 | Loss: 0.0395 | Acc: 100.0%
+Gamma 0.10 | Epoch 04 | Loss: 0.0230 | Acc: 100.0%
 Gamma 0.10 | Epoch 05 | Loss: 0.0153 | Acc: 100.0%
 Gamma 0.10 | Epoch 06 | Loss: 0.0110 | Acc: 100.0%
-Gamma 0.10 | Epoch 07 | Loss: 0.0083 | Acc: 100.0%
+Gamma 0.10 | Epoch 07 | Loss: 0.0084 | Acc: 100.0%
 Gamma 0.10 | Epoch 08 | Loss: 0.0066 | Acc: 100.0%
 Gamma 0.10 | Epoch 09 | Loss: 0.0053 | Acc: 100.0%
 Gamma 0.10 | Epoch 10 | Loss: 0.0044 | Acc: 100.0%
@@ -237,7 +236,7 @@ Gamma 0.10 | Epoch 23 | Loss: 0.0009 | Acc: 100.0%
 Gamma 0.10 | Epoch 24 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.10 | Epoch 25 | Loss: 0.0008 | Acc: 100.0%
 Gamma 0.10 | Epoch 26 | Loss: 0.0007 | Acc: 100.0%
-Gamma 0.10 | Epoch 27 | Loss: 0.0007 | Acc: 100.0%
+Gamma 0.10 | Epoch 27 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.10 | Epoch 28 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.10 | Epoch 29 | Loss: 0.0006 | Acc: 100.0%
 Gamma 0.10 | Epoch 30 | Loss: 0.0005 | Acc: 100.0%
@@ -261,7 +260,7 @@ Gamma 0.10 | Epoch 47 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.10 | Epoch 48 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.10 | Epoch 49 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.10 | Epoch 50 | Loss: 0.0002 | Acc: 100.0%
-Gamma 0.10 | Epoch 51 | Loss: 0.0002 | Acc: 100.0%
+Gamma 0.10 | Epoch 51 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.10 | Epoch 52 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.10 | Epoch 53 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.10 | Epoch 54 | Loss: 0.0001 | Acc: 100.0%
@@ -290,7 +289,7 @@ Gamma 0.10 | Epoch 76 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 77 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 78 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 79 | Loss: 0.0000 | Acc: 100.0%
-Gamma 0.10 | Epoch 80 | Loss: 0.0000 | Acc: 100.0%
+Gamma 0.10 | Epoch 80 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.10 | Epoch 81 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 82 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 83 | Loss: 0.0000 | Acc: 100.0%
@@ -313,13 +312,13 @@ Gamma 0.10 | Epoch 99 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.10 | Epoch 100 | Loss: 0.0000 | Acc: 100.0%
 
 Training Model with gamma = 0.25
-Gamma 0.25 | Epoch 01 | Loss: 0.9482 | Acc: 100.0%
-Gamma 0.25 | Epoch 02 | Loss: 0.0892 | Acc: 100.0%
-Gamma 0.25 | Epoch 03 | Loss: 0.0393 | Acc: 100.0%
-Gamma 0.25 | Epoch 04 | Loss: 0.0229 | Acc: 100.0%
+Gamma 0.25 | Epoch 01 | Loss: 0.9498 | Acc: 100.0%
+Gamma 0.25 | Epoch 02 | Loss: 0.0887 | Acc: 100.0%
+Gamma 0.25 | Epoch 03 | Loss: 0.0395 | Acc: 100.0%
+Gamma 0.25 | Epoch 04 | Loss: 0.0230 | Acc: 100.0%
 Gamma 0.25 | Epoch 05 | Loss: 0.0153 | Acc: 100.0%
 Gamma 0.25 | Epoch 06 | Loss: 0.0110 | Acc: 100.0%
-Gamma 0.25 | Epoch 07 | Loss: 0.0083 | Acc: 100.0%
+Gamma 0.25 | Epoch 07 | Loss: 0.0084 | Acc: 100.0%
 Gamma 0.25 | Epoch 08 | Loss: 0.0066 | Acc: 100.0%
 Gamma 0.25 | Epoch 09 | Loss: 0.0053 | Acc: 100.0%
 Gamma 0.25 | Epoch 10 | Loss: 0.0044 | Acc: 100.0%
@@ -363,7 +362,7 @@ Gamma 0.25 | Epoch 47 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.25 | Epoch 48 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.25 | Epoch 49 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.25 | Epoch 50 | Loss: 0.0002 | Acc: 100.0%
-Gamma 0.25 | Epoch 51 | Loss: 0.0002 | Acc: 100.0%
+Gamma 0.25 | Epoch 51 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.25 | Epoch 52 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.25 | Epoch 53 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.25 | Epoch 54 | Loss: 0.0001 | Acc: 100.0%
@@ -415,13 +414,13 @@ Gamma 0.25 | Epoch 99 | Loss: 0.0000 | Acc: 100.0%
 Gamma 0.25 | Epoch 100 | Loss: 0.0000 | Acc: 100.0%
 
 Training Model with gamma = 0.5
-Gamma 0.50 | Epoch 01 | Loss: 0.9490 | Acc: 100.0%
-Gamma 0.50 | Epoch 02 | Loss: 0.0893 | Acc: 100.0%
-Gamma 0.50 | Epoch 03 | Loss: 0.0393 | Acc: 100.0%
-Gamma 0.50 | Epoch 04 | Loss: 0.0229 | Acc: 100.0%
+Gamma 0.50 | Epoch 01 | Loss: 0.9503 | Acc: 100.0%
+Gamma 0.50 | Epoch 02 | Loss: 0.0888 | Acc: 100.0%
+Gamma 0.50 | Epoch 03 | Loss: 0.0395 | Acc: 100.0%
+Gamma 0.50 | Epoch 04 | Loss: 0.0230 | Acc: 100.0%
 Gamma 0.50 | Epoch 05 | Loss: 0.0153 | Acc: 100.0%
 Gamma 0.50 | Epoch 06 | Loss: 0.0110 | Acc: 100.0%
-Gamma 0.50 | Epoch 07 | Loss: 0.0083 | Acc: 100.0%
+Gamma 0.50 | Epoch 07 | Loss: 0.0084 | Acc: 100.0%
 Gamma 0.50 | Epoch 08 | Loss: 0.0066 | Acc: 100.0%
 Gamma 0.50 | Epoch 09 | Loss: 0.0053 | Acc: 100.0%
 Gamma 0.50 | Epoch 10 | Loss: 0.0044 | Acc: 100.0%
@@ -465,7 +464,7 @@ Gamma 0.50 | Epoch 47 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.50 | Epoch 48 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.50 | Epoch 49 | Loss: 0.0002 | Acc: 100.0%
 Gamma 0.50 | Epoch 50 | Loss: 0.0002 | Acc: 100.0%
-Gamma 0.50 | Epoch 51 | Loss: 0.0002 | Acc: 100.0%
+Gamma 0.50 | Epoch 51 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.50 | Epoch 52 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.50 | Epoch 53 | Loss: 0.0001 | Acc: 100.0%
 Gamma 0.50 | Epoch 54 | Loss: 0.0001 | Acc: 100.0%
