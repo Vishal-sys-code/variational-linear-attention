@@ -28,6 +28,7 @@ class InversePenaltyTracker(nn.Module):
         periodic_eps: float = 1e-5,
         period: int = 50,
         cond_threshold: float = 1e8,
+        enable_stabilization: bool = True,
     ):
         super().__init__()
         self.d_model = d_model
@@ -36,6 +37,7 @@ class InversePenaltyTracker(nn.Module):
         self.periodic_eps = periodic_eps
         self.period = period
         self.cond_threshold = cond_threshold
+        self.enable_stabilization = enable_stabilization
         
         # Buffers for state
         # A_t is not persistent because its shape depends on batch size.
@@ -114,12 +116,7 @@ class InversePenaltyTracker(nn.Module):
         # If |delta| < eps or NaN/Inf detected, fallback: A_t = A_{prev} + eps * I
         mask_unstable = (torch.abs(delta) < self.stabilization_eps) | ~torch.isfinite(delta)
         
-        # Increment step before applying updates (or after? prompt says "Every K steps". 
-        # Usually implies check after update or before. 
-        # "Log this at least every K steps". "Every K steps: A_t = ...".
-        # I'll increment at the end to match "step count".
-        
-        if mask_unstable.any():
+        if self.enable_stabilization and mask_unstable.any():
             self.fallback_count += mask_unstable.sum()
             
             # Prepare fallback update: eps * I
@@ -155,8 +152,7 @@ class InversePenaltyTracker(nn.Module):
         self.step += 1
         
         # 4. Periodic Stabilization
-        # Every K steps: A_t = A_t + (periodic_eps * I)
-        if self.step.item() % self.period == 0:
+        if self.enable_stabilization and self.step.item() % self.period == 0:
             B = u.size(0)
             d = self.d_model
             I = torch.eye(d, device=u.device, dtype=u.dtype).unsqueeze(0).expand(B, -1, -1)
