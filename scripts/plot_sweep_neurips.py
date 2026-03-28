@@ -115,7 +115,7 @@ def generate_publication_plots(json_path, out_dir):
     ax.set_ylabel(r'Trace($M_t$)')
     ax.set_title('Spectral Power Constraint Trajectory', pad=10, fontweight='bold')
     clean_spines(ax)
-    ax.legend(frameon=False, loc='upper right', fontsize=8)
+    ax.legend(frameon=False, loc='upper left', fontsize=8)
     
     plt.xlim(1, len(epochs))
     plt.tight_layout()
@@ -150,6 +150,60 @@ def generate_publication_plots(json_path, out_dir):
     plt.savefig(os.path.join(out_dir, "paper_heatmap_comparison.pdf"), bbox_inches='tight')
     plt.close()
     
+    # -------------------------------------------------------------
+    # 5. Attention Entropy Trajectories 
+    # -------------------------------------------------------------
+    entropy_path = os.path.join(os.path.dirname(json_path), "attention_entropy.json")
+    if os.path.exists(entropy_path):
+        with open(entropy_path, 'r') as f:
+            entropy_data = json.load(f)
+            
+        fig, ax = plt.subplots(figsize=(8, 5))
+        for i, g in enumerate(gamma_str):
+            if g in entropy_data:
+                lbl = f'Baseline' if g == '0.0' else rf'$\gamma={g}$'
+                ax.plot(epochs, entropy_data[g], label=lbl, color=colors[i])
+                
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel(r'Attention Entropy $\mathcal{H}$')
+        ax.set_title('Implicit Graph Focusing Dynamics', pad=10, fontweight='bold')
+        clean_spines(ax)
+        ax.legend(frameon=False, loc='upper right', fontsize=9)
+        
+        # Add a 15% top margin so the top right corner is clear for the legend
+        y_max = max([max(entropy_data[g]) for g in gamma_str if g in entropy_data])
+        y_min = min([min(entropy_data[g]) for g in gamma_str if g in entropy_data])
+        ax.set_ylim(y_min - 0.05 * abs(y_min), y_max + 0.20 * abs(y_max))
+        
+        plt.xlim(1, len(epochs))
+        plt.tight_layout()
+        plt.savefig(os.path.join(out_dir, "paper_attention_entropy.pdf"))
+        plt.close()
+
+    # -------------------------------------------------------------
+    # 6. Symbolic Constraint Ratio Trajectories 
+    # -------------------------------------------------------------
+    energy_path = os.path.join(os.path.dirname(json_path), "symbolic_energy.json")
+    if os.path.exists(energy_path):
+        with open(energy_path, 'r') as f:
+            energy_data = json.load(f)
+            
+        fig, ax = plt.subplots(figsize=(6, 3.5))
+        for i, g in enumerate(gamma_str):
+            if g in energy_data and g != '0.0':  # Baseline has 0 symbolic energy natively
+                ax.plot(epochs, energy_data[g], label=rf'$\gamma={g}$', color=colors[i])
+                
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel(r'Signal Ratio $E_{sym} / E_{base}$')
+        ax.set_title('Algorithmic Symbolic Dominance', pad=10, fontweight='bold')
+        clean_spines(ax)
+        ax.legend(frameon=False, loc='upper left', fontsize=8)
+        
+        plt.xlim(1, len(epochs))
+        plt.tight_layout()
+        plt.savefig(os.path.join(out_dir, "paper_symbolic_energy_ratio.pdf"))
+        plt.close()
+
     print("NeurIPS compliant publication plots generated successfully.")
 
 if __name__ == "__main__":
