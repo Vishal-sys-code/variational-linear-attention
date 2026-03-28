@@ -22,6 +22,8 @@ class LRATransformerBlock(nn.Module):
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
         vla_gamma: float = 0.0,
+        vla_fixed_lambda: Optional[float] = None,
+        vla_enable_stabilization: bool = True,
     ):
         super().__init__()
         
@@ -34,7 +36,9 @@ class LRATransformerBlock(nn.Module):
                 d_head=d_model,
                 lambda_0=vla_lambda_0,
                 penalty_rank=vla_penalty_rank,
-                gamma=vla_gamma
+                gamma=vla_gamma,
+                fixed_lambda=vla_fixed_lambda,
+                enable_stabilization=vla_enable_stabilization
             )
         elif attention_type == "linear_transformer":
             self.attn = LinearTransformerLayer(d_model=d_model)
@@ -106,6 +110,8 @@ class LRAModel(nn.Module):
         vla_lambda_0: float = 1.0,
         vla_penalty_rank: int = 1,
         vla_gamma: float = 0.0,
+        vla_fixed_lambda: Optional[float] = None,
+        vla_enable_stabilization: bool = True,
         num_classes: int = 2,
     ):
         super().__init__()
@@ -122,7 +128,9 @@ class LRAModel(nn.Module):
                 attention_type=attention_type,
                 vla_lambda_0=vla_lambda_0,
                 vla_penalty_rank=vla_penalty_rank,
-                vla_gamma=vla_gamma
+                vla_gamma=vla_gamma,
+                vla_fixed_lambda=vla_fixed_lambda,
+                vla_enable_stabilization=vla_enable_stabilization
             )
             for _ in range(n_layers)
         ])
