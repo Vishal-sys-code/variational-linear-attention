@@ -7,11 +7,11 @@ Evaluation showed minimal accuracy difference, relying on eigenvalue stability/m
 Diagnostic Trajectories (Last epoch stats):
 
 Gamma 0.0:
-  Condition Number: 2.67e+01
-  Trace(M_t): 111.00
-  Max Eigenvalue: 26.67
+  Condition Number: 2.69e+01
+  Trace(M_t): 116.59
+  Max Eigenvalue: 26.90
 
 Gamma 0.5:
-  Condition Number: 2.53e+01
-  Trace(M_t): 132.59
-  Max Eigenvalue: 25.31
+  Condition Number: 3.03e+01
+  Trace(M_t): 149.67
+  Max Eigenvalue: 30.29
