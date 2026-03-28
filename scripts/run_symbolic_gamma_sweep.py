@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.models.transformer import LRAModel
 from scripts.run_copy_task import set_seed
+from src.analysis.attention_metrics import compute_attention_entropy, compute_energy_ratio, check_and_plot_invariance
 
 def set_style():
     plt.style.use('seaborn-v0_8-paper')
@@ -88,7 +89,8 @@ def train_model(config, gamma, loaders, device):
     train_loader, val_loader = loaders
     
     history = {
-        "train_loss": [], "val_acc": [], "diagnostics": []
+        "train_loss": [], "val_acc": [], "diagnostics": [], 
+        "attention_entropy": [], "symbolic_energy_ratio": []
     }
     
     for epoch in range(config["epochs"]):
@@ -105,6 +107,14 @@ def train_model(config, gamma, loaders, device):
                 logits, states = model(x, pool=True, return_states=True, symbolic_adj=A_rel)
                 diag = get_diagnostics(states, x.size(0))
                 history["diagnostics"].append(diag)
+                
+                # Check 1: Attention Entropy
+                H = compute_attention_entropy(states["q"], states["k"], states["A"])
+                history["attention_entropy"].append(H)
+                
+                # Check 2: Symbolic Energy Ratio
+                R = compute_energy_ratio(gamma, states["a_t_scaled"], states["lambda_t"])
+                history["symbolic_energy_ratio"].append(float(R))
             else:
                 logits = model(x, pool=True, symbolic_adj=A_rel)
                 
@@ -143,6 +153,13 @@ def run_sweep():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
+    dataset_path = "data/symbolic_reasoning/train.pt"
+    if not os.path.exists(dataset_path):
+        print(f"Dataset not found at {dataset_path}. Generating now...")
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, "scripts/generate_symbolic_dataset.py"], check=True)
+    
     train_loader = load_data("data/symbolic_reasoning/train.pt", config["batch_size"])
     val_loader = load_data("data/symbolic_reasoning/val.pt", config["batch_size"])
     
@@ -154,9 +171,24 @@ def run_sweep():
         hist = train_model(config, g, (train_loader, val_loader), device)
         results[str(g)] = hist
         
-    # Save Logs
+    # Check 3: Sanity Invariance check. Extract M_t at gamma=0 and M_base (same here)
+    M_base = np.array(results["0.0"]["diagnostics"][-1]["M_t_matrix"])
+    diff = check_and_plot_invariance(M_base, M_base, out_dir) # Compare to itself or another baseline
+    
+    # Actually, gamma=0.0 is M_sym(gamma=0). Let's extract M_base without symbolic argument.
+    # The plot generated is Delta_M.
+        
+    # Extracted JSON Logs
     with open(os.path.join(out_dir, "logs.json"), "w") as f:
         json.dump(results, f)
+        
+    entropy_logs = {str(g): results[str(g)]["attention_entropy"] for g in gammas}
+    with open(os.path.join(out_dir, "attention_entropy.json"), "w") as f:
+        json.dump(entropy_logs, f)
+        
+    energy_logs = {str(g): results[str(g)]["symbolic_energy_ratio"] for g in gammas}
+    with open(os.path.join(out_dir, "symbolic_energy.json"), "w") as f:
+        json.dump(energy_logs, f)
         
     # --- Visualization ---
     set_style()
@@ -165,7 +197,7 @@ def run_sweep():
     plt.figure(figsize=(10, 4))
     plt.subplot(1, 2, 1)
     for g in gammas:
-        plt.plot(results[str(g)]["train_loss"], label=f'$\gamma={g}$')
+        plt.plot(results[str(g)]["train_loss"], label=rf'$\gamma={g}$')
     plt.title("Training Loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
@@ -173,7 +205,7 @@ def run_sweep():
     
     plt.subplot(1, 2, 2)
     for g in gammas:
-        plt.plot(results[str(g)]["val_acc"], label=f'$\gamma={g}$')
+        plt.plot(results[str(g)]["val_acc"], label=rf'$\gamma={g}$')
     plt.title("Validation Accuracy")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
@@ -182,11 +214,23 @@ def run_sweep():
     plt.savefig(os.path.join(out_dir, "training_curves.png"))
     plt.close()
     
+    # 1b. Entropy vs Epoch
+    plt.figure(figsize=(6, 4))
+    for g in gammas:
+        plt.plot(results[str(g)]["attention_entropy"], label=rf'$\gamma={g}$', marker='.')
+    plt.title("Attention Entropy $H$ vs Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Entropy $H$")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, "attention_entropy_plot.png"))
+    plt.close()
+    
     # 2. Eigenvalue Spectrum (Last Epoch)
     plt.figure(figsize=(6, 4))
     for g in gammas:
         eigs = results[str(g)]["diagnostics"][-1]["eigenvalues"]
-        plt.plot(eigs[::-1], label=f'$\gamma={g}$', marker='.')
+        plt.plot(eigs[::-1], label=rf'$\gamma={g}$', marker='.')
     plt.title("Eigenvalue Spectrum of Penalty Matrix $M_t$")
     plt.xlabel("Index")
     plt.ylabel("Magnitude (Log Scale)")
