@@ -21,6 +21,8 @@ class VLALayer(nn.Module):
         penalty_rank: int = 1,
         gamma: float = 0.0,
         chunk_size: int = 1,  # Not used in token-by-token, but for future compatibility
+        fixed_lambda: Optional[float] = None,
+        enable_stabilization: bool = True,
     ):
         super().__init__()
         self.d_model = d_model
@@ -39,18 +41,22 @@ class VLALayer(nn.Module):
         # Output Projection W_o: (d_head -> d_model)
         self.W_o = nn.Linear(self.d_head, self.d_model)
         
+        self.enable_stabilization = enable_stabilization
+        
         # W_u is handled inside PenaltyBuilder, which takes k_t as input.
         # PenaltyBuilder input dim is d_head (since k_t is d_head).
         self.penalty_builder = PenaltyBuilder(
             d_model=self.d_head,
             rank=penalty_rank,
-            lambda_min=1e-4
+            lambda_min=1e-4,
+            fixed_lambda=fixed_lambda
         )
 
         # State Managers
         self.inverse_tracker = InversePenaltyTracker(
             d_model=self.d_head,
-            lambda_0=lambda_0
+            lambda_0=lambda_0,
+            enable_stabilization=enable_stabilization
         )
         
         self.memory_manager = MemoryMatrixManager(
@@ -92,7 +98,7 @@ class VLALayer(nn.Module):
 
         outputs = []
         if return_states:
-            states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": []}
+            states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": [], "u_norm": [], "alpha_norm": []}
 
         # Iterate over tokens
         for t in range(T):
@@ -138,27 +144,28 @@ class VLALayer(nn.Module):
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)  # (B, d_head)
                 alpha_t = s_t * z_t  # (B, 1) * (B, d_head) -> (B, d_head)
             else:
-                # Fallback for rank > 1 if ever needed, though spec says "vector".
-                # If rank > 1, u_t is (B, r, d).
-                # This path is likely not hit if rank=1.
-                raise NotImplementedError("Rank > 1 not fully specified for alpha calculation in this task.")
+                # Rank > 1: u_t is (B, r, d). We use sum over r for alpha retrieval.
+                u_vec = u_t.sum(dim=1).unsqueeze(-1) # (B, d, 1)
+                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
+                alpha_t = s_t * z_t
 
             # Step 4.6: Update memory matrix S_t
             self.memory_manager.update(v_t, alpha_t)
             
             # Step 4.6b: Norm explosion stabilization
-            S_t = self.memory_manager.get_S()
-            # check norm per-batch element
-            S_norm = torch.norm(S_t, p='fro', dim=(1,2))
-            A_norm = torch.norm(A_t, p='fro', dim=(1,2))
-            
-            mask_explode = (S_norm > 1000) | (A_norm > 1000)
-            if mask_explode.any():
-                I = torch.eye(self.d_head, device=device, dtype=dtype).unsqueeze(0).expand(B, -1, -1)
-                fallback_add = 1e-5 * I
-                mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
-                A_t = torch.where(mask_expanded, A_t + fallback_add, A_t)
-                self.inverse_tracker.A_t = A_t
+            if self.enable_stabilization:
+                S_t = self.memory_manager.get_S()
+                # check norm per-batch element
+                S_norm = torch.norm(S_t, p='fro', dim=(1,2))
+                A_norm = torch.norm(A_t, p='fro', dim=(1,2))
+                
+                mask_explode = (S_norm > 1000) | (A_norm > 1000)
+                if mask_explode.any():
+                    I = torch.eye(self.d_head, device=device, dtype=dtype).unsqueeze(0).expand(B, -1, -1)
+                    fallback_add = 1e-5 * I
+                    mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
+                    A_t = torch.where(mask_expanded, A_t + fallback_add, A_t)
+                    self.inverse_tracker.A_t = A_t
 
             # Step 4.7: Compute output o_t
             o_t = self.memory_manager.compute_output(q_t)  # (B, d_head)
@@ -178,6 +185,10 @@ class VLALayer(nn.Module):
                     states["a_t_scaled"].append(a_t_scaled.clone().detach().cpu())
                 else:
                     states["a_t_scaled"].append(torch.zeros_like(k_t).cpu())
+                
+                # Append norms
+                states["u_norm"].append(torch.norm(u_t.view(B, -1), dim=-1).clone().detach().cpu())
+                states["alpha_norm"].append(torch.norm(alpha_t, dim=-1).clone().detach().cpu())
 
         # Step 5: Stack outputs
         O = torch.stack(outputs, dim=1)  # (B, T, d_head)
