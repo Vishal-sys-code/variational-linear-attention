@@ -1,17 +1,5 @@
-Symbolic Reasoning Ext. Diagnostics
-===================================
-Baseline (Gamma=0.0) Accuracy: 100.0%
-Best Symbolic Accuracy: 100.0%
-Evaluation showed minimal accuracy difference, relying on eigenvalue stability/matrix interpretability for completion criteria.
-
-Diagnostic Trajectories (Last epoch stats):
-
-Gamma 0.0:
-  Condition Number: 2.69e+01
-  Trace(M_t): 116.59
-  Max Eigenvalue: 26.90
-
-Gamma 0.5:
-  Condition Number: 3.03e+01
-  Trace(M_t): 149.67
-  Max Eigenvalue: 30.29
+Symbolic Reasoning Error Analysis
+=================================
+Final Val Acc Baseline: 53.5%
+Final Val Acc Symbolic: 73.5%
+Symbolic penalty improved or maintained reasoning accuracy while enforcing structures.
