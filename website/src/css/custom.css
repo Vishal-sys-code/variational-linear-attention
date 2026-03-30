@@ -1,48 +1,145 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+/*
+ * DeepBrain Labs Research Documentation Theme
+ * Highly aesthetic, minimalist, "cute" but professional.
+ * Typography focuses on clean lines, high legibility for math, and a muted elegant dark/light mode.
+ */
 
-:root {
-  --ifm-color-primary: #6c5ce7;
-  --ifm-color-primary-dark: #5844e3;
-  --ifm-color-primary-darker: #4f3ce0;
-  --ifm-color-primary-darkest: #3f2ca8;
-  --ifm-color-primary-light: #8375ea;
-  --ifm-color-primary-lighter: #8f82ec;
-  --ifm-color-primary-lightest: #b0a8f2;
-  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
-  --ifm-heading-font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
+:root,
 [data-theme='dark'] {
-  --ifm-color-primary: #a29bfe;
-  --ifm-color-primary-dark: #8c82fd;
-  --ifm-color-primary-darker: #8176fd;
-  --ifm-color-primary-darkest: #5b4cfc;
-  --ifm-color-primary-light: #b8b3fe;
-  --ifm-color-primary-lighter: #c2bfff;
-  --ifm-color-primary-lightest: #e2e1ff;
-  --ifm-background-color: #0A0A0E;
-  --ifm-background-surface-color: #12121A;
-  --ifm-color-content: #E2E8F0;
-  --ifm-color-emphasis-100: rgba(255, 255, 255, 0.03);
-  --ifm-color-emphasis-200: rgba(255, 255, 255, 0.06);
-  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.05);
-  --ifm-navbar-background-color: rgba(10, 10, 14, 0.8);
-  --ifm-navbar-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  /* Strict Deep Black Theme (DeepMind Style) */
+  --ifm-color-primary: #5b90f6;
+  --ifm-color-primary-dark: #3776f4;
+  --ifm-color-primary-darker: #256af3;
+  --ifm-color-primary-darkest: #0a52e1;
+  --ifm-color-primary-light: #7facf8;
+  --ifm-color-primary-lighter: #91b9f9;
+  --ifm-color-primary-lightest: #c7dbfc;
+
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ifm-heading-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', monospace;
+
+  /* Spacing and Borders */
+  --ifm-global-radius: 8px; /* Crisper, professional edges */
+  --ifm-spacing-horizontal: 1.5rem;
+  --ifm-spacing-vertical: 1.5rem;
+  
+  /* Text Colors */
+  --ifm-menu-color: #a1a1aa; 
+  --ifm-color-content: #d4d4d8; 
+  --ifm-heading-color: #ffffff;
+
+  /* Absolute Dark Backgrounds */
+  --ifm-background-color: #000000;
+  --ifm-background-surface-color: #09090b;
+  --ifm-footer-background-color: #09090b;
+
+  /* Muted backgrounds for code and inline elements */
+  --docusaurus-highlighted-code-line-bg: rgba(91, 144, 246, 0.15);
+  --ifm-color-emphasis-100: #18181b; 
+  --ifm-color-emphasis-200: #27272a; 
+  --ifm-color-emphasis-300: #3f3f46; 
 }
 
+/* Global Typography Adjustments */
 body {
   letter-spacing: 0.01em;
+  line-height: 1.7;
+  background-color: #000000;
+  background-image: none;
+  animation: none;
+}
+
+@keyframes sakuraFlow {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 150px 300px, 120px 270px, -200px 225px, 180px 330px, 0 0, 0 0; }
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--ifm-heading-font-family);
   font-weight: 700;
   letter-spacing: -0.02em;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
 }
 
+h1 { font-size: 2.5rem; }
+h2 { font-size: 1.8rem; border-bottom: 1px solid var(--ifm-color-emphasis-200); padding-bottom: 0.5rem; }
+h3 { font-size: 1.4rem; }
+
+/* Elegant Navbar */
 .navbar {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  padding: 0.5rem 1rem;
+}
+
+.navbar__brand {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Sidebar Styling */
+.menu__link {
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.menu__link--active {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+/* Math Block Styling */
+.math.math-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: var(--ifm-global-radius);
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.math.math-inline {
+  padding: 0.1rem 0.3rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 4px;
+}
+
+/* Code Block Enhancements */
+.prism-code {
+  border-radius: var(--ifm-global-radius) !important;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+code {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85em;
+  background-color: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+}
+
+/* Cards & Admonitions (Info boxes) */
+.alert {
+  border-radius: var(--ifm-global-radius);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  padding: 1.25rem 1.5rem;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+/* Images */
+article img {
+  border-radius: var(--ifm-global-radius);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  margin: 2rem 0;
 }
