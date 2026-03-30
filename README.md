@@ -31,7 +31,7 @@ This ensures extreme numerical preservation (maintaining stable unity eigenvalue
 
 ---
 
-## 🚀 Performance & Benchmarks
+## Performance & Benchmarks
 
 Our empirical evaluations across both Synthetic capabilities and symbolic reasoning scales showcase VLA operating natively at a State-of-the-Art capacity.
 
