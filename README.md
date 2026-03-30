@@ -2,7 +2,7 @@
   <h1>Variational Linear Attention (VLA)</h1>
   <p><strong>A Next-Generation Sequence Model by DeepBrain Labs</strong></p>
   <p>
-    <a href=""><strong>Read the Full Documentation »</strong></a>
+    <a href="https://variational-linear-attention.vercel.app/"><strong>Read the Full Documentation »</strong></a>
   </p>
 </div>
 
@@ -68,7 +68,7 @@ Our empirical evaluations across both Synthetic capabilities and symbolic reason
   </table>
 </div>
 
-*Detailed breakdown and interactive visualization tracking are available directly in our [Documentation Portal](https://deepbrain-labs.github.io/variational-linear-attention).*
+*Detailed breakdown and interactive visualization tracking are available directly in our [Documentation Portal](https://variational-linear-attention.vercel.app/).*
 
 ---
 
