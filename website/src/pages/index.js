@@ -16,6 +16,18 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        
+        <div style={{ marginTop: '1.5rem', marginBottom: '2rem' }}>
+          <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>
+            Vishal S. Pandey<sup style={{ fontSize: '0.8em', marginLeft: '2px' }}>1</sup> &nbsp;&bull;&nbsp; 
+            Rishav Tewari<sup style={{ fontSize: '0.8em', marginLeft: '2px' }}>1</sup> &nbsp;&bull;&nbsp; 
+            Ruzina Haque Laskar<sup style={{ fontSize: '0.8em', marginLeft: '2px' }}>2</sup>
+          </p>
+          <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.8, marginTop: '0.2rem' }}>
+            <sup>1</sup> DeepBrain Labs &nbsp;&nbsp;&nbsp;
+            <sup>2</sup> Center for Development of Telematics
+          </p>
+        </div>
         <div className={styles.buttons}>
           <Link
             className="button button--primary button--lg"
