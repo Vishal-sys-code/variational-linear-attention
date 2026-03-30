@@ -31,13 +31,44 @@ This ensures extreme numerical preservation (maintaining stable unity eigenvalue
 
 ---
 
-## Performance & Benchmarks
+## 🚀 Performance & Benchmarks
 
-Our empirical evaluations across both Synthetic capabilities and the LRA (Long Range Arena) scale showcase VLA operating natively at a State-of-the-Art capacity.
+Our empirical evaluations across both Synthetic capabilities and symbolic reasoning scales showcase VLA operating natively at a State-of-the-Art capacity.
 
 - **Synthetic Retrieval:** Hits perfect exact match accuracy on 10,000+ length associative and delayed recall tasks, where standard Linear Transformers drop to baseline 0% due to capacity erasure.
-- **Long Range Arena (LRA):** Exhibits powerful dominance against leading Linear-Time variants in memory-intensive logic flows (`Path-X` and `Text`). 
-*Detailed breakdown and visualization tracking available in our [Documentation Portal](https://deepbrain-labs.github.io/variational-linear-attention).*
+- **Symbolic Reasoning & LRA:** Exhibits powerful dominance against leading Linear-Time variants in memory-intensive logic flows specifically evaluated on **ListOps**, **CLUTRR**, and **CommonsenseQA**.
+
+<div align="center">
+  <h3>Experimental Visualizations & Ablations</h3>
+  <table>
+    <tr>
+      <td align="center">
+        <b>1. Phase D Ablation Studies</b><br/>
+        <img src="website/static/img/ablation_summary.png" alt="Ablation Summaries" width="400"/>
+        <br/><i>Comparing learning drivers vs fixed bounds</i>
+      </td>
+      <td align="center">
+        <b>2. Penalty Matrix Heatmap ($M_t$)</b><br/>
+        <img src="website/static/img/heatmap_Mt_pub.png" alt="Dynamic Penalty Matrix" width="400"/>
+        <br/><i>Visualizing targeted exponential decay</i>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <b>3. Recursive Eigenvalue Stability</b><br/>
+        <img src="website/static/img/eigenvalues_plot_pub.png" alt="Numerical Stability" width="400"/>
+        <br/><i>$\epsilon$-bounded rank-1 inversion preservation</i>
+      </td>
+      <td align="center">
+        <b>4. LRA & Symbolic Task Overviews</b><br/>
+        <img src="website/static/img/neurips_fig1_per_task.png" alt="LRA Accuracies" width="400"/>
+        <br/><i>Performance spanning 10K+ contexts</i>
+      </td>
+    </tr>
+  </table>
+</div>
+
+*Detailed breakdown and interactive visualization tracking are available directly in our [Documentation Portal](https://deepbrain-labs.github.io/variational-linear-attention).*
 
 ---
 
