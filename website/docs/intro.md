@@ -10,9 +10,9 @@ Welcome to the official research documentation for **Variational Linear Attentio
 
 ## The Problem
 
-Standard Transformers rely on Softmax Attention, which scales quadratically with sequence length ($O(T^2)$). This makes them prohibitively expensive for long-context applications. 
+Standard Transformers rely on Softmax Attention, which scales quadratically with sequence length ($\mathcal{O}(T^2)$). This makes them prohibitively expensive for long-context applications. 
 
-Linear Attention models, on the other hand, approximate the attention mechanism to achieve linear complexity ($O(T)$). However, they often suffer from "attention dilution" and struggle with long-term memory recall tasks, such as the Associative Recall or Delayed Copy tasks. They typically fail to dynamically prioritize relevant information over time.
+Linear Attention models, on the other hand, approximate the attention mechanism to achieve linear complexity ($\mathcal{O}(T)$). However, they often suffer from "attention dilution" and struggle with long-term memory recall tasks, such as the Associative Recall or Delayed Copy tasks. They typically fail to dynamically prioritize relevant information over time.
 
 ## Our Solution: VLA
 
@@ -21,7 +21,7 @@ Linear Attention models, on the other hand, approximate the attention mechanism 
 ### Key Innovations
 
 1.  **Dynamic Penalty Matrix ($M_t$)**: Unlike standard linear attention which treats all past tokens equally (or uses fixed decay), VLA learns to construct a penalty matrix based on the current context. This allows it to forget irrelevant information and strongly remember crucial tokens.
-2.  **Sherman-Morrison Updates**: We utilize the Sherman-Morrison rank-1 update formula to efficiently compute the inverse of the penalty matrix ($M_t^{-1}$) at each timestep in $O(d^2)$ time, maintaining the overall linear complexity $O(T d^2)$.
+2.  **Sherman-Morrison Updates**: We utilize the Sherman-Morrison rank-1 update formula to efficiently compute the inverse of the penalty matrix ($M_t^{-1}$) at each timestep in $\mathcal{O}(d^2)$ time, maintaining the overall linear complexity $\mathcal{O}(T d^2)$.
 3.  **Optimal Coefficient Recovery**: VLA solves an online optimization problem at every step to find the optimal memory update coefficients, ensuring the memory matrix is updated in a theoretically grounded manner.
 
 ## Structure of this Documentation
