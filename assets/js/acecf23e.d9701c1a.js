@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkwebsite=globalThis.webpackChunkwebsite||[]).push([[903],{1912(a){a.exports=JSON.parse('{"blogBasePath":"/variational-linear-attention/blog","blogTitle":"Blog","authorsListPath":"/variational-linear-attention/blog/authors"}')}}]);
