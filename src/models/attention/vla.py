@@ -98,7 +98,7 @@ class VLALayer(nn.Module):
 
         outputs = []
         if return_states:
-            states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": [], "u_norm": [], "alpha_norm": []}
+            states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": [], "u_norm": [], "alpha_norm": [], "norm_A_t": [], "norm_S_t": []}
 
         # Iterate over tokens
         for t in range(T):
@@ -175,7 +175,10 @@ class VLALayer(nn.Module):
             if return_states:
                 states["A"].append(A_t.clone().detach().cpu())
                 S_t = self.memory_manager.get_S()
-                states["S_norm"].append(torch.norm(S_t, p='fro', dim=(1,2)).clone().detach().cpu())
+                S_t_norm = torch.norm(S_t, p='fro', dim=(1,2)).clone().detach().cpu()
+                states["S_norm"].append(S_t_norm)
+                states["norm_S_t"].append(S_t_norm) # requested by user
+                states["norm_A_t"].append(torch.norm(A_t, p='fro', dim=(1,2)).clone().detach().cpu())
                 states["q"].append(q_t.clone().detach().cpu())
                 states["k"].append(k_t.clone().detach().cpu())
                 states["v"].append(v_t.clone().detach().cpu())
