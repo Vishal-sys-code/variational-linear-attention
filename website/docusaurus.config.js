@@ -13,7 +13,7 @@ import rehypeKatex from 'rehype-katex';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Variational Linear Attention',
-  tagline: 'Research documentation for VLA, by DeepBrain Labs',
+  tagline: 'A Next-Generation Sequence Model by Vishal S. Pandey, Rishav Tewari (DeepBrain Labs), and Ruzina Haque Laskar (Center for Development of Telematics)',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -144,7 +144,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} DeepBrain Labs. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Vishal S. Pandey, Rishav Tewari, and Ruzina Haque Laskar (DeepBrain Labs & Center for Development of Telematics). Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
