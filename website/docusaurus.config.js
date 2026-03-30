@@ -107,7 +107,7 @@ const config = {
             label: 'Documentation',
           },
           {
-            href: 'https://github.com/deepbrain-labs/variational-linear-attention',
+            href: 'https://github.com/Vishal-sys-code/variational-linear-attention',
             label: 'GitHub',
             position: 'right',
           },
@@ -139,7 +139,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/deepbrain-labs/variational-linear-attention',
+                href: 'https://github.com/Vishal-sys-code/variational-linear-attention',
               },
             ],
           },
