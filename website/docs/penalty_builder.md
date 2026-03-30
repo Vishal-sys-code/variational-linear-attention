@@ -21,8 +21,12 @@ The module supports multiple parameterizations for the penalty matrix, balancing
 The simplest and most robust parameterization. The matrix is decomposed into a uniform decay scalar ($\lambda_t$) and a rank-1 outer product ($u_t u_t^\top$), which allows the model to selectively penalize specific directions in the key-space.
 
 **Formulas:**
-$$ \lambda_t = \text{softplus}(\text{MLP}_\lambda(k_t)) $$
-$$ u_t = W_u k_t $$
+$$
+\lambda_t = \text{softplus}(\text{MLP}_\lambda(k_t))
+$$
+$$
+u_t = W_u k_t
+$$
 
 **Implementation Constraints:**
 -   $\lambda_t$ is strictly clamped to $\ge \lambda_{\text{min}}$ (e.g., $10^{-3}$) to guarantee positive definiteness.
@@ -34,8 +38,12 @@ $$ u_t = W_u k_t $$
 A higher-capacity parameterization that allows the model to penalize an $r$-dimensional subspace at each step.
 
 **Formulas:**
-$$ \lambda_t = \text{softplus}(\text{MLP}_\lambda(k_t)) $$
-$$ u_{t,m} = W_{u,m} k_t \quad \text{for } m = 1, \dots, r $$
+$$
+\lambda_t = \text{softplus}(\text{MLP}_\lambda(k_t))
+$$
+$$
+u_{t,m} = W_{u,m} k_t \quad \text{for } m = 1, \dots, r
+$$
 
 **Implementation Constraints:**
 -   $U_t = [u_{t,1}, \dots, u_{t,r}]$ is computed efficiently via a single batched linear projection $W_u \in \mathbb{R}^{(r \cdot d) \times d}$ and subsequently reshaped into $(B, r, d)$.
@@ -46,8 +54,12 @@ $$ u_{t,m} = W_{u,m} k_t \quad \text{for } m = 1, \dots, r $$
 This parameterization uses a generic feature map $\phi(x)$ to approximate full kernelized penalty landscapes.
 
 **Formulas:**
-$$ M_t \approx \lambda I + \phi_t \phi_t^\top $$
-$$ \phi_t = W_\phi k_t $$
+$$
+M_t \approx \lambda I + \phi_t \phi_t^\top
+$$
+$$
+\phi_t = W_\phi k_t
+$$
 
 *Note: Currently implemented via `KernelPenaltyBuilder`. This shares the logic of Rank-1 but is designed for future expansions into full RBF kernel approximations.*
 
