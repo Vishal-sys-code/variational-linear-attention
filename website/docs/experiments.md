@@ -64,7 +64,7 @@ The Long Range Arena is a suite of tasks specifically designed to evaluate effic
 ### Task-Specific Analysis
 
 ![LRA Per Task](/img/neurips_fig1_per_task.png)
-*Fig 6: Breakdown of LRA performance. VLA exhibits particularly strong gains on the Path-X task (16K sequence length), proving its ability to model extreme long-range dependencies where standard attention mechanisms fail due to $O(N^2)$ constraints.*
+*Fig 6: Breakdown of LRA performance. VLA exhibits particularly strong gains on the Path-X task (16K sequence length), proving its ability to model extreme long-range dependencies where standard attention mechanisms fail due to $\mathcal{O}(N^2)$ constraints.*
 
 ---
 
@@ -73,4 +73,4 @@ The Long Range Arena is a suite of tasks specifically designed to evaluate effic
 The empirical results confirm our theoretical hypotheses:
 1. **Expressivity**: VLA perfectly solves synthetic memory bottlenecks.
 2. **Stability**: The matrix inverse recurrence remains strictly stable for sequence lengths exceeding $10^4$.
-3. **Scalability**: VLA delivers state-of-the-art accuracy on long-context benchmarks while maintaining $O(T d^2)$ runtime complexity.
+3. **Scalability**: VLA delivers state-of-the-art accuracy on long-context benchmarks while maintaining $\mathcal{O}(T d^2)$ runtime complexity.
