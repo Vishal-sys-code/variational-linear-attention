@@ -12,9 +12,9 @@ This document outlines the core mathematical primitives implemented in `src/math
 
 The attention score $s_t$ at timestep $t$ is computed as the scaled dot product of a key vector $k_t \in \mathbb{R}^d$ and a query vector $q_t \in \mathbb{R}^d$:
 
-```math
+$$
 s_t = \frac{k_t^\top q_t}{\sqrt{d}}
-```
+$$
 
 **Implementation Details:**
 - **Returns**: A scalar value indicating query-key relevance.
@@ -35,28 +35,28 @@ Given:
 
 The updated penalty matrix naturally takes the form $M_t = M_{t-1} + u_t u_t^\top$. Computing $(M_t)^{-1}$ directly scales at $\mathcal{O}(d^3)$. However, by leveraging the Sherman-Morrison identify, we reconstruct the inverse update securely in $\mathcal{O}(d^2)$:
 
-```math
+$$
 A_t = A_{t-1} - \frac{A_{t-1} u_t u_t^\top A_{t-1}}{1 + u_t^\top A_{t-1} u_t}
-```
+$$
 
 ### Algorithmic Execution Steps
 1. **Compute Denominator (Scalar):** 
-```math
+$$
 \delta = 1 + u_t^\top \left(A_{t-1} u_t\right)
-```
+$$
 2. **Numerical Safety Enforcement:** If the absolute value $|\delta| < \epsilon$, a strict fallback is triggered (adding $\epsilon I$) stopping division by zero or gradient detonation. (Default $\epsilon \approx 10^{-6}$).
 3. **Compute Intermediate Vector ($z \in \mathbb{R}^d$):** 
-```math
+$$
 z = A_{t-1} u_t
-```
+$$
 4. **Compute Outer Product ($O \in \mathbb{R}^{d \times d}$):** 
-```math
+$$
 O = z z^\top
-```
+$$
 5. **Final Rank-1 Update:** 
-```math
+$$
 A_t = A_{t-1} - \frac{O}{\delta}
-```
+$$
 6. **Periodic Stabilization:** Every $K$ steps, add $\epsilon I$ onto the diagonal tensor of $A_t$ to correct accumulating floating-point drift. This represents a critical fix for extremely long context sequence regimes.
 
 ---
@@ -65,13 +65,13 @@ A_t = A_{t-1} - \frac{O}{\delta}
 
 To securely support higher-rank context parameterizations, we sequence iterating rank-1 updates $\{u_1, u_2, \dots, u_r\}$. This explicitly mirrors the mathematical equivalence of the Woodbury matrix identity for a rank-$r$ update—but iterating sequentially minimizes dangerous intermediate memory spikes.
 
-```math
+$$
 \begin{aligned}
 A^{(0)} &= A_{t-1} \\
 A^{(i)} &= \text{ShermanMorrison}\left(A^{(i-1)}, \ u_i\right) \quad \text{for } i \in \{1, \dots, r\} \\
 A_t &= A^{(r)}
 \end{aligned}
-```
+$$
 
 ---
 
@@ -81,9 +81,9 @@ In standard Linear Attention, the global memory matrix $S_t$ is linearly updated
 
 As VLA naturally tracks the inverted formulation $A_t = M_t^{-1}$, generating the theoretical ground-truth optimum $\alpha^* = M_t^{-1} s_t$ simplifies exponentially into a single matrix-vector hardware product:
 
-```math
+$$
 \alpha_t = A_t s_t
-```
+$$
 
 ---
 
@@ -91,9 +91,9 @@ As VLA naturally tracks the inverted formulation $A_t = M_t^{-1}$, generating th
 
 Having securely arrived at the optimal coefficient map $\alpha_t$, the global memory matrix $S_t$ updates to ingest new contextual information:
 
-```math
+$$
 S_t = S_{t-1} + \alpha_t \otimes \left(v_t k_t^\top\right)
-```
+$$
 
 **Implementation Details:**
 - **Batched Outer Products:** Evaluated safely using `v.unsqueeze(2) * alpha.unsqueeze(1)` ensuring fast batched hardware execution without explicit loops.
