@@ -29,16 +29,19 @@ class DeltaNetLayer(nn.Module):
         # S_0 is zero
         S = torch.zeros(B, D, D, device=device)
         
+        # Vectorize parameter mappings over the entire sequence T beforehand!
+        Q = self.W_q(x)
+        K = F.normalize(self.W_k(x), p=2, dim=-1)
+        V = self.W_v(x)
+        Beta = torch.sigmoid(self.W_beta(K))
+        
         for t in range(T):
-            x_t = x[:, t, :]
-            
-            q = self.W_q(x_t)
-            # Normalizing keys is mathematically required for DeltaNet stability to bound eigenvalues
-            k = F.normalize(self.W_k(x_t), p=2, dim=-1)
-            v = self.W_v(x_t)
+            q = Q[:, t, :]
+            k = K[:, t, :]
+            v = V[:, t, :]
             
             # (B, 1)
-            beta = torch.sigmoid(self.W_beta(k))
+            beta = Beta[:, t, :]
             
             # S_{t-1} k_t
             # (B, D, D) @ (B, D, 1) -> (B, D, 1) -> (B, D)
