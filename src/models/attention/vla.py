@@ -100,23 +100,28 @@ class VLALayer(nn.Module):
         if return_states:
             states = {"A": [], "S_norm": [], "q": [], "k": [], "v": [], "alpha": [], "lambda_t": [], "a_t_scaled": [], "u_norm": [], "alpha_norm": [], "norm_A_t": [], "norm_S_t": []}
 
+        # Hoist full sequence linear projections
+        # This dramatically reduces step-by-step kernel launch overhead!
+        Q = self.W_q(x)
+        K = self.W_k(x)
+        V = self.W_v(x)
+        
+        # Batch construct penalties across the whole sequence T
+        Lambda_seq, U_seq, _ = self.penalty_builder(K)
+
         # Iterate over tokens
         for t in range(T):
-            x_t = x[:, t, :]  # (B, d_model)
-
-            # Step 4.1: Project to q, k, v
-            q_t = self.W_q(x_t)  # (B, d_head)
-            k_t = self.W_k(x_t)  # (B, d_head)
-            v_t = self.W_v(x_t)  # (B, d_head)
+            # Extract current timestep pre-computed vectors
+            q_t = Q[:, t, :]  # (B, d_head)
+            k_t = K[:, t, :]  # (B, d_head)
+            v_t = V[:, t, :]  # (B, d_head)
 
             # Step 4.2: Compute score s_t
-            # s_t = dot(k_t, q_t)
-            # (B, d_head) * (B, d_head) -> sum -> (B, 1)
             s_t = (k_t * q_t).sum(dim=-1, keepdim=True)  # (B, 1)
 
-            # Step 4.3: Build penalty components
-            # lambda_t: (B, 1), u_t: (B, d_head) (if rank=1)
-            lambda_t, u_t, _ = self.penalty_builder(k_t)
+            # Step 4.3: Extract pre-computed penalty components
+            lambda_t = Lambda_seq[:, t, :]
+            u_t = U_seq[:, t, :]
 
             # Step 4.4: Update A_t using u_t
             # We use the existing tracker which updates A_t internally.
