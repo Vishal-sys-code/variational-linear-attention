@@ -165,6 +165,15 @@ def main():
     layer_cls = models[args.model]
     model = ModelWrapper(layer_cls, args.d_model, args.vocab_size).to(device)
     
+    # Dramatically speed up unrolled Python `for` loops on Colab by fusing kernels
+    # Check if we are on a platform that supports compile (Colab does)
+    if hasattr(torch, "compile") and os.name != "nt":
+        print("Compiling model with torch.compile() for massive speedup...")
+        try:
+            model = torch.compile(model)
+        except Exception as e:
+            print("Warning: torch.compile failed, falling back to eager mode.")
+            
     # Execute loop
     final_acc = train_and_eval(model, args, device)
     print(f"\nFinal Test Accuracy for {args.model} at Length {args.seq_len}: {final_acc:.4f}")
