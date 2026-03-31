@@ -84,11 +84,16 @@ def train_and_eval(model, args, device):
     
     with open(csv_path, mode='w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(["epoch", "train_loss", "test_acc", "epoch_time_sec"])
+        writer.writerow(["epoch", "train_loss", "train_acc", "test_acc", "epoch_time_sec"])
+        
+        print("\n" + "="*80)
+        print(f"{'Epoch':<10} | {'Train Loss':<15} | {'Train Acc':<15} | {'Test Acc':<15} | {'Time (s)':<10}")
+        print("="*80)
         
         for epoch in range(1, args.epochs + 1):
             model.train()
             total_loss = 0
+            train_correct = 0
             start_time = time.time()
             
             # Simulated training batches per epoch
@@ -104,27 +109,35 @@ def train_and_eval(model, args, device):
                 optimizer.step()
                 
                 total_loss += loss.item()
+                preds = logits.argmax(dim=-1)
+                train_correct += (preds == y).sum().item()
                 
             avg_loss = total_loss / batches_per_epoch
+            train_acc = train_correct / (batches_per_epoch * args.batch_size)
             
             # Validation
             model.eval()
-            correct = 0
+            test_correct = 0
             test_batches = args.num_test_samples // args.batch_size
             with torch.no_grad():
                 for _ in range(test_batches):
                     x, y = generate_batch(args.batch_size, args.seq_len, args.vocab_size, args.num_pairs, device)
                     logits = model(x)
                     preds = logits.argmax(dim=-1)
-                    correct += (preds == y).sum().item()
+                    test_correct += (preds == y).sum().item()
             
-            acc = correct / (test_batches * args.batch_size)
+            test_acc = test_correct / (test_batches * args.batch_size)
             epoch_time = time.time() - start_time
             
-            print(f"Epoch {epoch}/{args.epochs} | Loss: {avg_loss:.4f} | Test Acc: {acc:.4f} | Time: {epoch_time:.2f}s")
-            writer.writerow([epoch, avg_loss, acc, epoch_time])
+            print(f"{epoch:<10} | {avg_loss:<15.4f} | {train_acc:<15.4f} | {test_acc:<15.4f} | {epoch_time:<10.2f}")
             
-    return acc
+            # Write out to CSV immediately and flush disk buffer
+            writer.writerow([epoch, avg_loss, train_acc, test_acc, epoch_time])
+            f.flush()
+            
+        print("="*80 + "\n")
+            
+    return test_acc
 
 def main():
     parser = argparse.ArgumentParser(description="Associative Retrieval Benchmark")
