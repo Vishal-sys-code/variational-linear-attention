@@ -33,15 +33,18 @@ class LinearTransformerLayer(nn.Module):
         S = torch.zeros(B, D, D, device=device)
         Z = torch.zeros(B, D, device=device)
         
+        # Vectorize core linear mappings
+        Q = self.W_q(x)
+        K = self.W_k(x)
+        V = self.W_v(x)
+        
+        Q_phi = self.phi(Q)
+        K_phi = self.phi(K)
+        
         for t in range(T):
-            x_t = x[:, t, :]
-            
-            q = self.W_q(x_t)
-            k = self.W_k(x_t)
-            v = self.W_v(x_t)
-            
-            q_phi = self.phi(q)
-            k_phi = self.phi(k)
+            q_phi = Q_phi[:, t, :]
+            k_phi = K_phi[:, t, :]
+            v = V[:, t, :]
             
             # S_t = S_{t-1} + k_phi * v^T
             # (B, D, 1) @ (B, 1, D)
