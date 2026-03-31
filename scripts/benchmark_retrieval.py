@@ -102,8 +102,11 @@ def train_and_eval(model, args, device):
                 x, y = generate_batch(args.batch_size, args.seq_len, args.vocab_size, args.num_pairs, device)
                 
                 optimizer.zero_grad()
-                logits = model(x)
-                loss = criterion(logits, y)
+                
+                with torch.autocast(device_type=device.type, dtype=torch.bfloat16):
+                    logits = model(x)
+                    loss = criterion(logits, y)
+                    
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
@@ -122,7 +125,8 @@ def train_and_eval(model, args, device):
             with torch.no_grad():
                 for _ in range(test_batches):
                     x, y = generate_batch(args.batch_size, args.seq_len, args.vocab_size, args.num_pairs, device)
-                    logits = model(x)
+                    with torch.autocast(device_type=device.type, dtype=torch.bfloat16):
+                        logits = model(x)
                     preds = logits.argmax(dim=-1)
                     test_correct += (preds == y).sum().item()
             
@@ -164,15 +168,6 @@ def main():
     
     layer_cls = models[args.model]
     model = ModelWrapper(layer_cls, args.d_model, args.vocab_size).to(device)
-    
-    # Dramatically speed up unrolled Python `for` loops on Colab by fusing kernels
-    # Check if we are on a platform that supports compile (Colab does)
-    if hasattr(torch, "compile") and os.name != "nt":
-        print("Compiling model with torch.compile() for massive speedup...")
-        try:
-            model = torch.compile(model)
-        except Exception as e:
-            print("Warning: torch.compile failed, falling back to eager mode.")
             
     # Execute loop
     final_acc = train_and_eval(model, args, device)
