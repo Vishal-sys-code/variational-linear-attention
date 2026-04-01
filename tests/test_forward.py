@@ -104,7 +104,8 @@ def test_vla_small_t_reference():
             
             # Update S
             # S_t = S_{t-1} + v_t alpha_t^T
-            S = S + torch.outer(v_t, alpha_t)
+            v_t_f32 = v_t / (torch.norm(v_t) + 1e-6)
+            S = S + torch.outer(v_t_f32, alpha_t)
             
             # Output o_t
             # o_t = S_t q_t
