@@ -34,7 +34,8 @@ def test_rank1_update(memory_manager):
     # Manual update
     # v_t: (B, d) -> (B, d, 1)
     # alpha_t: (B, d) -> (B, 1, d)
-    update = torch.matmul(v_t.unsqueeze(2), alpha_t.unsqueeze(1))
+    v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
+    update = torch.matmul(v_t_f32.unsqueeze(2), alpha_t.unsqueeze(1))
     S_expected = S_prev + update
     
     assert torch.allclose(S_curr, S_expected, atol=1e-6, rtol=1e-6), "Rank-1 update mismatch"
@@ -65,7 +66,8 @@ def test_unrolled_sum(memory_manager):
     # Manual sum
     S_manual = torch.zeros(B, d, d)
     for t in range(T):
-        update = torch.matmul(v_seq[t].unsqueeze(2), alpha_seq[t].unsqueeze(1))
+        v_t_f32 = v_seq[t] / (torch.norm(v_seq[t], dim=-1, keepdim=True) + 1e-6)
+        update = torch.matmul(v_t_f32.unsqueeze(2), alpha_seq[t].unsqueeze(1))
         S_manual += update
         
     assert torch.allclose(S_final, S_manual, atol=1e-6, rtol=1e-6), "Unrolled sum mismatch"
@@ -121,19 +123,14 @@ def test_stability_renorm():
     # Norm is 10. If existing S was small, new S has norm >= 10.
     
     v = torch.zeros(B, d)
-    v[0, 0] = 20.0 # Large value
+    v[0, 0] = 20.0 # Will be normalized
     alpha = torch.zeros(B, d)
-    alpha[0, 0] = 1.0
-    
-    # Update 1: S becomes [[20, ...], ...]
-    # Norm should be 20.
-    # Should trigger renorm.
-    # New S should be S / 20 -> [[1, ...], ...]
+    alpha[0, 0] = 20.0
     
     stats = manager.update(v, alpha)
     
     assert stats['renorm_triggered'] == 1.0, "Renormalization should have triggered"
-    assert stats['norm_max'] == 20.0, f"Expected max norm 20.0 before renorm, got {stats['norm_max']}"
+    assert abs(stats['norm_max'] - 20.0) < 1e-4, f"Expected max norm ~20.0 before renorm, got {stats['norm_max']}"
     
     # Verify S_t is renormalized
     S_curr = manager.get_S()
@@ -157,16 +154,16 @@ def test_stability_no_renorm():
     v = torch.zeros(B, d)
     v[0, 0] = 20.0
     alpha = torch.zeros(B, d)
-    alpha[0, 0] = 1.0
+    alpha[0, 0] = 20.0
     
     stats = manager.update(v, alpha)
     
     assert stats['renorm_triggered'] == 0.0, "Renormalization should NOT have triggered"
-    assert stats['norm_max'] == 20.0
+    assert abs(stats['norm_max'] - 20.0) < 1e-4
     
     S_curr = manager.get_S()
     norm_new = torch.norm(S_curr)
-    assert torch.abs(norm_new - 20.0) < 1e-5, f"Expected norm 20.0, got {norm_new}"
+    assert torch.abs(norm_new - 20.0) < 1e-4, f"Expected norm 20.0, got {norm_new}"
 
 def test_mixed_batch_renorm():
     """
@@ -184,7 +181,7 @@ def test_mixed_batch_renorm():
     
     # Batch 0: Large update (20)
     v[0, 0] = 20.0
-    alpha[0, 0] = 1.0
+    alpha[0, 0] = 20.0
     
     # Batch 1: Small update (1)
     v[1, 0] = 1.0
