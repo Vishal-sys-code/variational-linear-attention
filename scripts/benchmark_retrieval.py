@@ -82,6 +82,10 @@ def train_and_eval(model, args, device):
     csv_path = f"results/retrieval_{args.model}_{args.seq_len}.csv"
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     
+    best_acc = -1.0
+    patience_counter = 0
+    patience = 5
+    
     with open(csv_path, mode='w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["epoch", "train_loss", "train_acc", "test_acc", "epoch_time_sec"])
@@ -139,15 +143,25 @@ def train_and_eval(model, args, device):
             writer.writerow([epoch, avg_loss, train_acc, test_acc, epoch_time])
             f.flush()
             
+            if test_acc > best_acc + 0.005:
+                best_acc = test_acc
+                patience_counter = 0
+            else:
+                patience_counter += 1
+                
+            if patience_counter >= patience:
+                print(f"Early stopping triggered at epoch {epoch}. No significant improvement in {patience} epochs.")
+                break
+            
         print("="*80 + "\n")
             
-    return test_acc
+    return best_acc
 
 def main():
     parser = argparse.ArgumentParser(description="Associative Retrieval Benchmark")
     parser.add_argument("--model", type=str, required=True, choices=["VLA", "DeltaNet", "Linear"], help="Model architecture")
     parser.add_argument("--seq_len", type=int, required=True, help="Sequence Length")
-    parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=30, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
     parser.add_argument("--num_train_samples", type=int, default=1024, help="Samples per epoch for training")
     parser.add_argument("--num_test_samples", type=int, default=256, help="Samples for validation")
@@ -174,4 +188,4 @@ def main():
     print(f"\nFinal Test Accuracy for {args.model} at Length {args.seq_len}: {final_acc:.4f}")
 
 if __name__ == "__main__":
-    main()
+    main()
