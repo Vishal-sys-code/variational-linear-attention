@@ -7,4 +7,4 @@ data/
 wandb/
 *.npy
 *.npz
-long-range-arena/
+long-range-arena/sphinx_docs/_build/
