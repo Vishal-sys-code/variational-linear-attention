@@ -228,7 +228,6 @@ class VLALayer(nn.Module):
 
             # Step 4.6: Update memory matrix S_t
             v_t_f32 = v_t.to(dtype=torch.float32)
-            v_t_f32 = v_t_f32 / (torch.norm(v_t_f32, dim=-1, keepdim=True) + 1e-6)
             alpha_t_f32 = alpha_t.to(dtype=torch.float32)
             
             update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t_f32.unsqueeze(1))
