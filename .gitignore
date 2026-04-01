@@ -8,3 +8,4 @@ wandb/
 *.npy
 *.npz
 long-range-arena/sphinx_docs/_build/
+long-range-arena/
