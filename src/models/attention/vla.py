@@ -109,6 +109,19 @@ class VLALayer(nn.Module):
         # Batch construct penalties across the whole sequence T
         Lambda_seq, U_seq, _ = self.penalty_builder(K)
 
+        # Fast inline variables
+        I_fallback = torch.eye(self.d_head, device=device, dtype=dtype).unsqueeze(0).expand(B, -1, -1)
+        fallback_add_inv = self.inverse_tracker.stabilization_eps * I_fallback
+        periodic_add_inv = self.inverse_tracker.periodic_eps * I_fallback
+        fallback_add_explode = 1e-5 * I_fallback
+        
+        A_t = self.inverse_tracker.A_t
+        S_t = self.memory_manager.S_t
+        
+        inv_step = self.inverse_tracker.step.item()
+        mem_step = self.memory_manager.step.item()
+        fallback_count = self.inverse_tracker.fallback_count.item()
+
         # Iterate over tokens
         for t in range(T):
             # Extract current timestep pre-computed vectors
@@ -124,65 +137,133 @@ class VLALayer(nn.Module):
             u_t = U_seq[:, t, :]
 
             # Step 4.4: Update A_t using u_t
-            # We use the existing tracker which updates A_t internally.
-            self.inverse_tracker.update(u_t)
-            
+            if u_t.dim() == 2:
+                u_vec = u_t.unsqueeze(-1)
+                z = torch.bmm(A_t, u_vec)
+                dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
+                delta = 1.0 + dot
+                mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
+                
+                if self.enable_stabilization and mask_unstable.any():
+                    numerator = torch.bmm(z, z.transpose(1, 2))
+                    safe_delta = delta.clone()
+                    safe_delta[mask_unstable] = 1.0
+                    update_term = numerator / safe_delta.view(-1, 1, 1)
+                    
+                    A_stable = A_t - update_term
+                    A_unstable = A_t + fallback_add_inv
+                    mask_expanded = mask_unstable.view(-1, 1, 1).expand_as(A_t)
+                    A_t = torch.where(mask_expanded, A_unstable, A_stable)
+                    fallback_count += mask_unstable.sum().item()
+                else:
+                    numerator = torch.bmm(z, z.transpose(1, 2))
+                    update_term = numerator / delta.view(-1, 1, 1)
+                    A_t = A_t - update_term
+            else:
+                r = u_t.size(1)
+                for i in range(r):
+                    u_i = u_t[:, i, :]
+                    u_vec = u_i.unsqueeze(-1)
+                    z = torch.bmm(A_t, u_vec)
+                    dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
+                    delta = 1.0 + dot
+                    mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
+                    
+                    if self.enable_stabilization and mask_unstable.any():
+                        numerator = torch.bmm(z, z.transpose(1, 2))
+                        safe_delta = delta.clone()
+                        safe_delta[mask_unstable] = 1.0
+                        update_term = numerator / safe_delta.view(-1, 1, 1)
+                        A_stable = A_t - update_term
+                        A_unstable = A_t + fallback_add_inv
+                        mask_expanded = mask_unstable.view(-1, 1, 1).expand_as(A_t)
+                        A_t = torch.where(mask_expanded, A_unstable, A_stable)
+                        fallback_count += mask_unstable.sum().item()
+                    else:
+                        numerator = torch.bmm(z, z.transpose(1, 2))
+                        update_term = numerator / delta.view(-1, 1, 1)
+                        A_t = A_t - update_term
+
+            inv_step += 1
+            if self.enable_stabilization and inv_step % self.inverse_tracker.period == 0:
+                A_t = A_t + periodic_add_inv
+
             # Step 4.4b: Update A_t using symbolic relations if provided
             a_t_scaled = self.symbolic_tracker.step(k_t, t)
             if a_t_scaled is not None:
-                # Need to handle case where mask zeroed out batch elements without relations
-                # InverseTracker applies Sherman-Morrison for the whole batch. If a_t is 0 for some
-                # the update is 0 since outer product is 0.
-                self.inverse_tracker.update(a_t_scaled)
+                u_vec = a_t_scaled.unsqueeze(-1)
+                z = torch.bmm(A_t, u_vec)
+                dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
+                delta = 1.0 + dot
+                mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
                 
-            A_t = self.inverse_tracker.get()  # (B, d_head, d_head)
+                if self.enable_stabilization and mask_unstable.any():
+                    numerator = torch.bmm(z, z.transpose(1, 2))
+                    safe_delta = delta.clone()
+                    safe_delta[mask_unstable] = 1.0
+                    update_term = numerator / safe_delta.view(-1, 1, 1)
+                    A_stable = A_t - update_term
+                    A_unstable = A_t + fallback_add_inv
+                    mask_expanded = mask_unstable.view(-1, 1, 1).expand_as(A_t)
+                    A_t = torch.where(mask_expanded, A_unstable, A_stable)
+                    fallback_count += mask_unstable.sum().item()
+                else:
+                    numerator = torch.bmm(z, z.transpose(1, 2))
+                    update_term = numerator / delta.view(-1, 1, 1)
+                    A_t = A_t - update_term
+
+                inv_step += 1
+                if self.enable_stabilization and inv_step % self.inverse_tracker.period == 0:
+                    A_t = A_t + periodic_add_inv
 
             # Step 4.5: Compute alpha_t
-            # alpha_t = s_t * (A_t * u_t)
-            # u_t is (B, d). If rank > 1, u_t is (B, r, d).
-            # Spec implies vector u_t. If rank > 1, we might need adjustments.
-            # Assuming rank=1 for standard VLA.
-            
-            # A_t @ u_t: (B, d, d) @ (B, d, 1) -> (B, d, 1)
             if u_t.dim() == 2:
                 u_vec = u_t.unsqueeze(-1)
-                z_t = torch.bmm(A_t, u_vec).squeeze(-1)  # (B, d_head)
-                alpha_t = s_t * z_t  # (B, 1) * (B, d_head) -> (B, d_head)
+                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
+                alpha_t = s_t * z_t
             else:
-                # Rank > 1: u_t is (B, r, d). We use sum over r for alpha retrieval.
-                u_vec = u_t.sum(dim=1).unsqueeze(-1) # (B, d, 1)
+                u_vec = u_t.sum(dim=1).unsqueeze(-1)
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)
                 alpha_t = s_t * z_t
 
             # Step 4.6: Update memory matrix S_t
-            self.memory_manager.update(v_t, alpha_t)
+            v_t_f32 = v_t.to(dtype=torch.float32)
+            v_t_f32 = v_t_f32 / (torch.norm(v_t_f32, dim=-1, keepdim=True) + 1e-6)
+            alpha_t_f32 = alpha_t.to(dtype=torch.float32)
+            
+            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t_f32.unsqueeze(1))
+            S_t = S_t + update_term_S
+            mem_step += 1
+            
+            if self.memory_manager.enable_renorm:
+                S_norms = torch.norm(S_t, p='fro', dim=(1, 2))
+                mask_renorm = S_norms > self.memory_manager.renorm_threshold
+                if mask_renorm.any():
+                    divisor = torch.ones_like(S_norms)
+                    divisor[mask_renorm] = S_norms[mask_renorm]
+                    S_t = S_t / divisor.view(-1, 1, 1)
             
             # Step 4.6b: Norm explosion stabilization
             if self.enable_stabilization:
-                S_t = self.memory_manager.get_S()
-                # check norm per-batch element
                 S_norm = torch.norm(S_t, p='fro', dim=(1,2))
                 A_norm = torch.norm(A_t, p='fro', dim=(1,2))
                 
                 mask_explode = (S_norm > 1000) | (A_norm > 1000)
                 if mask_explode.any():
-                    I = torch.eye(self.d_head, device=device, dtype=dtype).unsqueeze(0).expand(B, -1, -1)
-                    fallback_add = 1e-5 * I
                     mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
-                    A_t = torch.where(mask_expanded, A_t + fallback_add, A_t)
-                    self.inverse_tracker.A_t = A_t
+                    A_t = torch.where(mask_expanded, A_t + fallback_add_explode, A_t)
 
             # Step 4.7: Compute output o_t
-            o_t = self.memory_manager.compute_output(q_t)  # (B, d_head)
+            q_t_f32 = q_t.to(dtype=torch.float32)
+            o_t = torch.matmul(S_t, q_t_f32.unsqueeze(2)).squeeze(2)
             
             outputs.append(o_t)
             
             if return_states:
                 states["A"].append(A_t.clone().detach().cpu())
-                S_t = self.memory_manager.get_S()
                 S_t_norm = torch.norm(S_t, p='fro', dim=(1,2)).clone().detach().cpu()
                 states["S_norm"].append(S_t_norm)
-                states["norm_S_t"].append(S_t_norm) # requested by user
+                states["norm_S_t"].append(S_t_norm)
                 states["norm_A_t"].append(torch.norm(A_t, p='fro', dim=(1,2)).clone().detach().cpu())
                 states["q"].append(q_t.clone().detach().cpu())
                 states["k"].append(k_t.clone().detach().cpu())
@@ -193,10 +274,15 @@ class VLALayer(nn.Module):
                     states["a_t_scaled"].append(a_t_scaled.clone().detach().cpu())
                 else:
                     states["a_t_scaled"].append(torch.zeros_like(k_t).cpu())
-                
-                # Append norms
                 states["u_norm"].append(torch.norm(u_t.view(B, -1), dim=-1).clone().detach().cpu())
                 states["alpha_norm"].append(torch.norm(alpha_t, dim=-1).clone().detach().cpu())
+
+        # Save states back
+        self.inverse_tracker.A_t = A_t
+        self.inverse_tracker.step = torch.tensor(inv_step, device=device, dtype=torch.long)
+        self.inverse_tracker.fallback_count = torch.tensor(fallback_count, device=device, dtype=torch.long)
+        self.memory_manager.S_t = S_t
+        self.memory_manager.step = torch.tensor(mem_step, device=device, dtype=torch.long)
 
         # Step 5: Stack outputs
         O = torch.stack(outputs, dim=1)  # (B, T, d_head)
