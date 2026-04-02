@@ -83,6 +83,8 @@ def train_and_eval(model, args, device):
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     
     best_acc = -1.0
+    patience_counter = 0
+    patience = 5
     
     with open(csv_path, mode='w', newline='') as f:
         writer = csv.writer(f)
@@ -143,6 +145,13 @@ def train_and_eval(model, args, device):
             
             if test_acc > best_acc:
                 best_acc = test_acc
+                patience_counter = 0
+            else:
+                patience_counter += 1
+                
+            if patience_counter >= patience:
+                print(f"Early stopping triggered at epoch {epoch}. No significant improvement in {patience} epochs.")
+                break
             
         print("="*80 + "\n")
             
