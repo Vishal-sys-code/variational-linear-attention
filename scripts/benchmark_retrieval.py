@@ -76,7 +76,7 @@ def generate_batch(batch_size, sequence_length, vocab_size, num_pairs, device):
     return seqs, targets
 
 def train_and_eval(model, args, device):
-    optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)
+    optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-2)
     criterion = nn.CrossEntropyLoss()
     
     csv_path = f"results/retrieval_{args.model}_{args.seq_len}.csv"
@@ -167,7 +167,8 @@ def main():
     parser.add_argument("--num_test_samples", type=int, default=256, help="Samples for validation")
     parser.add_argument("--vocab_size", type=int, default=32, help="Vocabulary size")
     parser.add_argument("--d_model", type=int, default=64, help="Hidden dimension")
-    parser.add_argument("--num_pairs", type=int, default=5, help="Key-Value pairs to memorize")
+    parser.add_argument("--num_pairs", type=int, default=20, help="Key-Value pairs to memorize")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
     args = parser.parse_args()
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
