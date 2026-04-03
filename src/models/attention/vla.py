@@ -135,13 +135,17 @@ class VLALayer(nn.Module):
             # Step 4.3: Extract pre-computed penalty components
             lambda_t = Lambda_seq[:, t, :]
             u_t = U_seq[:, t, :]
+            
+            # Step 4.3b: Scale u_t to prevent large rank-1 updates
+            import math
+            u_t = u_t / math.sqrt(self.d_head)
 
             # Step 4.4: Update A_t using u_t
             if u_t.dim() == 2:
                 u_vec = u_t.unsqueeze(-1)
                 z = torch.bmm(A_t, u_vec)
                 dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
-                delta = 1.0 + dot
+                delta = torch.clamp(1.0 + dot, min=1e-6)
                 mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
                 
                 if self.enable_stabilization and mask_unstable.any():
@@ -166,7 +170,7 @@ class VLALayer(nn.Module):
                     u_vec = u_i.unsqueeze(-1)
                     z = torch.bmm(A_t, u_vec)
                     dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
-                    delta = 1.0 + dot
+                    delta = torch.clamp(1.0 + dot, min=1e-6)
                     mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
                     
                     if self.enable_stabilization and mask_unstable.any():
@@ -194,7 +198,7 @@ class VLALayer(nn.Module):
                 u_vec = a_t_scaled.unsqueeze(-1)
                 z = torch.bmm(A_t, u_vec)
                 dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
-                delta = 1.0 + dot
+                delta = torch.clamp(1.0 + dot, min=1e-6)
                 mask_unstable = (torch.abs(delta) < self.inverse_tracker.stabilization_eps) | ~torch.isfinite(delta)
                 
                 if self.enable_stabilization and mask_unstable.any():
