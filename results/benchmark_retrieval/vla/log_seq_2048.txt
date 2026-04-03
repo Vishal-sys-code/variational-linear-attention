@@ -1,0 +1,4 @@
+COMMAND:
+!PYTHONPATH=. python scripts/benchmark_retrieval.py --model VLA --seq_len 2048 --epochs 100 --batch_size 4
+
+RESULTS:
