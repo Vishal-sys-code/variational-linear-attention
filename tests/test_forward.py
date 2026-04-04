@@ -89,6 +89,8 @@ def test_vla_small_t_reference():
             
             # Update M
             # M_t = M_{t-1} + u_t u_t^T
+            import math
+            u_t = u_t / math.sqrt(d_head)
             M = M + torch.outer(u_t, u_t)
             
             # Compute A_t = inv(M)

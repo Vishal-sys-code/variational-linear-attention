@@ -125,16 +125,16 @@ class VLALayer(nn.Module):
         # Iterate over tokens
         for t in range(T):
             # Extract current timestep pre-computed vectors
-            q_t = Q[:, t, :]  # (B, d_head)
-            k_t = K[:, t, :]  # (B, d_head)
-            v_t = V[:, t, :]  # (B, d_head)
+            q_t = Q[:, t, :].to(dtype=torch.float32)  # (B, d_head)
+            k_t = K[:, t, :].to(dtype=torch.float32)  # (B, d_head)
+            v_t = V[:, t, :].to(dtype=torch.float32)  # (B, d_head)
 
             # Step 4.2: Compute score s_t
             s_t = (k_t * q_t).sum(dim=-1, keepdim=True)  # (B, 1)
 
             # Step 4.3: Extract pre-computed penalty components
-            lambda_t = Lambda_seq[:, t, :]
-            u_t = U_seq[:, t, :]
+            lambda_t = Lambda_seq[:, t, :].to(dtype=torch.float32)
+            u_t = U_seq[:, t, :].to(dtype=torch.float32)
             
             # Step 4.3b: Scale u_t to prevent large rank-1 updates
             import math
@@ -195,6 +195,7 @@ class VLALayer(nn.Module):
             # Step 4.4b: Update A_t using symbolic relations if provided
             a_t_scaled = self.symbolic_tracker.step(k_t, t)
             if a_t_scaled is not None:
+                a_t_scaled = a_t_scaled.to(dtype=torch.float32)
                 u_vec = a_t_scaled.unsqueeze(-1)
                 z = torch.bmm(A_t, u_vec)
                 dot = torch.bmm(u_vec.transpose(1, 2), z).squeeze(-1).squeeze(-1)
@@ -231,10 +232,9 @@ class VLALayer(nn.Module):
                 alpha_t = s_t * z_t
 
             # Step 4.6: Update memory matrix S_t
-            v_t_f32 = v_t.to(dtype=torch.float32)
-            alpha_t_f32 = alpha_t.to(dtype=torch.float32)
+            v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
             
-            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t_f32.unsqueeze(1))
+            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t.unsqueeze(1))
             S_t = S_t + update_term_S
             mem_step += 1
             
@@ -257,8 +257,7 @@ class VLALayer(nn.Module):
                     A_t = torch.where(mask_expanded, A_t + fallback_add_explode, A_t)
 
             # Step 4.7: Compute output o_t
-            q_t_f32 = q_t.to(dtype=torch.float32)
-            o_t = torch.matmul(S_t, q_t_f32.unsqueeze(2)).squeeze(2)
+            o_t = torch.matmul(S_t, q_t.unsqueeze(2)).squeeze(2)
             
             outputs.append(o_t)
             
@@ -288,7 +287,7 @@ class VLALayer(nn.Module):
         self.memory_manager.step = torch.tensor(mem_step, device=device, dtype=torch.long)
 
         # Step 5: Stack outputs
-        O = torch.stack(outputs, dim=1)  # (B, T, d_head)
+        O = torch.stack(outputs, dim=1).to(dtype=dtype)  # (B, T, d_head)
         
         # Step 6: Output Projection
         O = self.W_o(O)  # (B, T, d_model)
