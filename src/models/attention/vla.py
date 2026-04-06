@@ -129,7 +129,7 @@ class VLALayer(nn.Module):
             k_t = K[:, t, :].to(dtype=torch.float32)  # (B, d_head)
             v_t = V[:, t, :].to(dtype=torch.float32)  # (B, d_head)
 
-            # Step 4.2: Compute score s_t
+            # Step 4.2: Compute score s_t (legacy, unused for routing but kept for diagnostics if needed)
             s_t = (k_t * q_t).sum(dim=-1, keepdim=True)  # (B, 1)
 
             # Step 4.3: Extract pre-computed penalty components
@@ -225,11 +225,11 @@ class VLALayer(nn.Module):
             if u_t.dim() == 2:
                 u_vec = u_t.unsqueeze(-1)
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = s_t * z_t
+                alpha_t = z_t
             else:
                 u_vec = u_t.sum(dim=1).unsqueeze(-1)
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = s_t * z_t
+                alpha_t = z_t
 
             # Step 4.6: Update memory matrix S_t
             v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
