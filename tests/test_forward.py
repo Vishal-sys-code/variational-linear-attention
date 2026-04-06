@@ -78,7 +78,7 @@ def test_vla_small_t_reference():
             v_t = W_v(x_t) # (d_head,)
             
             # Score
-            s_t = torch.dot(k_t, q_t) # Scalar
+            s_t = torch.dot(k_t, q_t) # Scalar (legacy)
             
             # Penalty
             # Model uses penalty_builder(k_t)
@@ -100,9 +100,9 @@ def test_vla_small_t_reference():
             A = A_64.to(torch.float32)
             
             # Compute alpha_t
-            # alpha_t = s_t * (A * u_t)
+            # alpha_t = z_t
             z_t = torch.mv(A, u_t) # (d_head,)
-            alpha_t = s_t * z_t # (d_head,)
+            alpha_t = z_t # (d_head,)
             
             # Update S
             # S_t = S_{t-1} + v_t alpha_t^T
