@@ -69,6 +69,7 @@ def test_vla_small_t_reference():
         M = lambda_0 * torch.eye(d_head, device=DEVICE)
         S = torch.zeros(d_head, d_head, device=DEVICE)
         
+        outputs_b = []
         for t in range(T):
             x_t = x[b, t] # (d_model,)
             
@@ -120,8 +121,14 @@ def test_vla_small_t_reference():
             # o_t = S_t q_t
             o_t_pre = torch.mv(S, q_t) # (d_head,)
             
-            # Apply W_o
-            o_t_ref = model.W_o(o_t_pre) # (d_model,)
+            outputs_b.append(o_t_pre)
+            
+        O_b = torch.stack(outputs_b, dim=0)
+        O_b = model.out_norm(O_b)
+        O_b = model.W_o(O_b)
+        
+        for t in range(T):
+            o_t_ref = O_b[t]
             
             # Compare with model output
             o_t_model = model_out[b, t]
