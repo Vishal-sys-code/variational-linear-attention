@@ -39,6 +39,7 @@ class VLALayer(nn.Module):
         self.W_v = nn.Linear(d_model, self.d_head)
         
         # Output Projection W_o: (d_head -> d_model)
+        self.out_norm = nn.LayerNorm(self.d_head)
         self.W_o = nn.Linear(self.d_head, self.d_model)
         
         self.enable_stabilization = enable_stabilization
@@ -262,17 +263,8 @@ class VLALayer(nn.Module):
                 
                 mask_explode = (S_norm > 1000) | (A_norm > 1000)
                 if mask_explode.any():
-                    # Handle NaNs that might have been introduced during explosive norms
-                    A_t = torch.nan_to_num(A_t, nan=0.0, posinf=0.0, neginf=0.0)
-                    S_t = torch.nan_to_num(S_t, nan=0.0, posinf=0.0, neginf=0.0)
-
-                    mask_expanded_A = mask_explode.view(-1, 1, 1).expand_as(A_t)
-                    A_t = torch.where(mask_expanded_A, A_t + fallback_add_explode, A_t)
-                    
-                    mask_expanded_S = mask_explode.view(-1, 1, 1).expand_as(S_t)
-                    # Reset S_t if it exploded
-                    S_reset = torch.zeros_like(S_t)
-                    S_t = torch.where(mask_expanded_S, S_reset, S_t)
+                    mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
+                    A_t = torch.where(mask_expanded, A_t + fallback_add_explode, A_t)
 
             # Step 4.7: Compute output o_t
             o_t = torch.matmul(S_t, q_t.unsqueeze(2)).squeeze(2)
@@ -308,6 +300,7 @@ class VLALayer(nn.Module):
         O = torch.stack(outputs, dim=1).to(dtype=dtype)  # (B, T, d_head)
         
         # Step 6: Output Projection
+        O = self.out_norm(O)
         O = self.W_o(O)  # (B, T, d_model)
         
         if return_states:
