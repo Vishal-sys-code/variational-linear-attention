@@ -100,17 +100,14 @@ def test_vla_small_t_reference():
             A = A_64.to(torch.float32)
             
             # Compute alpha_t
-            # VLA uses k_t for alpha_t and scales by sqrt(d_model)
+            # VLA uses k_t for alpha_t without scaling
             z_t = torch.mv(A, k_t) # (d_head,)
-            alpha_t = z_t / math.sqrt(d_model) # (d_head,)
+            alpha_t = z_t # (d_head,)
             
             # Update S with residual
             v_t_f32 = v_t
             v_hat_t = torch.mv(S, k_t)
             e_t = v_t_f32 - v_hat_t
-            
-            # Scale residual
-            e_t = e_t / math.sqrt(d_model)
             
             # Clip residual magnitude
             e_norm = torch.norm(e_t)
