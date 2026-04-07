@@ -221,20 +221,30 @@ class VLALayer(nn.Module):
                 if self.enable_stabilization and inv_step % self.inverse_tracker.period == 0:
                     A_t = A_t + periodic_add_inv
 
-            # Step 4.5: Compute alpha_t
-            if u_t.dim() == 2:
-                u_vec = u_t.unsqueeze(-1)
-                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t
-            else:
-                u_vec = u_t.sum(dim=1).unsqueeze(-1)
-                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t
+            # Step 4.5: Compute alpha_t using k_t (not u_t)
+            k_vec = k_t.unsqueeze(-1)
+            # Scale alpha_t by sqrt(d_model)
+            alpha_t = torch.bmm(A_t, k_vec).squeeze(-1) / math.sqrt(self.d_model)
 
-            # Step 4.6: Update memory matrix S_t
-            v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
+            # Step 4.6: Update memory matrix S_t with residual error
+            # Do NOT normalize v_t
+            v_t_f32 = v_t
             
-            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t.unsqueeze(1))
+            # Prediction: v_hat_t = S_{t-1} @ k_t
+            v_hat_t = torch.bmm(S_t, k_vec).squeeze(-1)
+            
+            # Error: e_t = v_t - v_hat_t
+            e_t = v_t_f32 - v_hat_t
+            
+            # Scale residual
+            e_t = e_t / math.sqrt(self.d_model)
+            
+            # Clip residual magnitude
+            e_norm = torch.norm(e_t, dim=-1, keepdim=True)
+            e_t = torch.where(e_norm > 10.0, e_t * (10.0 / (e_norm + 1e-6)), e_t)
+            
+            # Update: S_t = S_{t-1} + e_t @ alpha_t^T
+            update_term_S = torch.matmul(e_t.unsqueeze(2), alpha_t.unsqueeze(1))
             S_t = S_t + update_term_S
             mem_step += 1
             
@@ -253,8 +263,17 @@ class VLALayer(nn.Module):
                 
                 mask_explode = (S_norm > 1000) | (A_norm > 1000)
                 if mask_explode.any():
-                    mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
-                    A_t = torch.where(mask_expanded, A_t + fallback_add_explode, A_t)
+                    # Handle NaNs that might have been introduced during explosive norms
+                    A_t = torch.nan_to_num(A_t, nan=0.0, posinf=0.0, neginf=0.0)
+                    S_t = torch.nan_to_num(S_t, nan=0.0, posinf=0.0, neginf=0.0)
+
+                    mask_expanded_A = mask_explode.view(-1, 1, 1).expand_as(A_t)
+                    A_t = torch.where(mask_expanded_A, A_t + fallback_add_explode, A_t)
+                    
+                    mask_expanded_S = mask_explode.view(-1, 1, 1).expand_as(S_t)
+                    # Reset S_t if it exploded
+                    S_reset = torch.zeros_like(S_t)
+                    S_t = torch.where(mask_expanded_S, S_reset, S_t)
 
             # Step 4.7: Compute output o_t
             o_t = torch.matmul(S_t, q_t.unsqueeze(2)).squeeze(2)
