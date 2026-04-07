@@ -223,8 +223,8 @@ class VLALayer(nn.Module):
 
             # Step 4.5: Compute alpha_t using k_t (not u_t)
             k_vec = k_t.unsqueeze(-1)
-            # Scale alpha_t by sqrt(d_model)
-            alpha_t = torch.bmm(A_t, k_vec).squeeze(-1) / math.sqrt(self.d_model)
+            # NO scaling for alpha_t
+            alpha_t = torch.bmm(A_t, k_vec).squeeze(-1)
 
             # Step 4.6: Update memory matrix S_t with residual error
             # Do NOT normalize v_t
@@ -236,10 +236,9 @@ class VLALayer(nn.Module):
             # Error: e_t = v_t - v_hat_t
             e_t = v_t_f32 - v_hat_t
             
-            # Scale residual
-            e_t = e_t / math.sqrt(self.d_model)
+            # NO residual scaling initially
             
-            # Clip residual magnitude
+            # Clip residual magnitude (optional safeguard requested previously, keeping just in case, but no sqrt scaling)
             e_norm = torch.norm(e_t, dim=-1, keepdim=True)
             e_t = torch.where(e_norm > 10.0, e_t * (10.0 / (e_norm + 1e-6)), e_t)
             
