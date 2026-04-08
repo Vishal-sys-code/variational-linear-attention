@@ -25,6 +25,7 @@ class SymbolicReasoningDataset(Dataset):
         self.of = 7
         
         self.entities = list(range(8, 34)) # A-Z
+        self.entities_t = torch.tensor(self.entities, dtype=torch.long)
         self.vocab_size = 35
         
         self.data = []
@@ -65,19 +66,13 @@ class SymbolicReasoningDataset(Dataset):
             
             sequence.extend([self.query, e_a, self.is_t, self.anc, self.of, e_b])
             
-            # Create Adjacency Matrix for "Same Entity"
-            seq_len = len(sequence)
-            A_rel = torch.zeros(seq_len, seq_len)
-            
-            # find all entities in sequence
-            for i in range(seq_len):
-                if sequence[i] in self.entities:
-                    for j in range(seq_len):
-                        if sequence[j] == sequence[i]:
-                            A_rel[i, j] = 1.0
-
             x = torch.tensor(sequence, dtype=torch.long)
             y = torch.tensor(ans, dtype=torch.long)
+
+            # Create Adjacency Matrix for "Same Entity"
+            mask = torch.isin(x, self.entities_t)
+            is_same = x.unsqueeze(1) == x.unsqueeze(0)
+            A_rel = (is_same & mask.unsqueeze(1)).float()
             
             self.data.append((x, y, A_rel))
 
