@@ -9,9 +9,6 @@
     <sup>1</sup>DeepBrain Labs &nbsp;&nbsp;&nbsp;
     <sup>2</sup>Metriqual
   </p>
-  <p>
-    <a href="https://variational-linear-attention.vercel.app/"><strong>Read the Full Documentation »</strong></a>
-  </p>
 </div>
 
 <br />
