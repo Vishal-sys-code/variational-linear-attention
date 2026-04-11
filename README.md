@@ -3,7 +3,7 @@
   <p><strong>A Next-Generation Sequence Model</strong></p>
   <p>
     <strong>Vishal S. Pandey</strong><sup>1</sup> &nbsp;&bull;&nbsp; 
-    <strong>Gopal Singh</strong><sup>1</sup>
+    <strong>Gopal Singh</strong><sup>2</sup>
   </p>
   <p>
     <sup>1</sup>DeepBrain Labs &nbsp;&nbsp;&nbsp;
