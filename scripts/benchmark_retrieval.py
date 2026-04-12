@@ -173,7 +173,16 @@ def main():
     }
     
     layer_cls = models[args.model]
-    model = ModelWrapper(layer_cls, args.d_model, args.vocab_size).to(device)
+    
+    if args.model == "VLA":
+        # Pass lambda_0=0.1 as requested by the user for stabilization
+        class VLALayerWithLambda(layer_cls):
+            def __init__(self, *args_init, **kwargs_init):
+                kwargs_init["lambda_0"] = 0.1
+                super().__init__(*args_init, **kwargs_init)
+        model = ModelWrapper(VLALayerWithLambda, args.d_model, args.vocab_size).to(device)
+    else:
+        model = ModelWrapper(layer_cls, args.d_model, args.vocab_size).to(device)
             
     # Execute loop
     final_acc = train_and_eval(model, args, device)

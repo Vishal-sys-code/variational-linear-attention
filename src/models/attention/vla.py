@@ -39,6 +39,7 @@ class VLALayer(nn.Module):
         self.W_v = nn.Linear(d_model, self.d_head)
         
         # Output Projection W_o: (d_head -> d_model)
+        self.out_norm = nn.LayerNorm(self.d_head)
         self.W_o = nn.Linear(self.d_head, self.d_model)
         
         self.enable_stabilization = enable_stabilization
@@ -221,22 +222,29 @@ class VLALayer(nn.Module):
                 if self.enable_stabilization and inv_step % self.inverse_tracker.period == 0:
                     A_t = A_t + periodic_add_inv
 
-            # Step 4.5: Determine key for memory insertion (unscaled by A_t to avoid temporal skew)
-            if u_t.dim() == 2:
-                u_vec = u_t.unsqueeze(-1)
-                k_mem = u_t
-                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t # kept for states
-            else:
-                u_vec = u_t.sum(dim=1).unsqueeze(-1)
-                k_mem = u_t.sum(dim=1)
-                z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t # kept for states
+            # Step 4.5: Compute alpha_t using k_t (not u_t)
+            k_vec = k_t.unsqueeze(-1)
+            # NO scaling for alpha_t
+            alpha_t = torch.bmm(A_t, k_vec).squeeze(-1)
 
-            # Step 4.6: Update memory matrix S_t
-            v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
+            # Step 4.6: Update memory matrix S_t with residual error
+            # Do NOT normalize v_t
+            v_t_f32 = v_t
             
-            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), k_mem.unsqueeze(1))
+            # Prediction: v_hat_t = S_{t-1} @ k_t
+            v_hat_t = torch.bmm(S_t, k_vec).squeeze(-1)
+            
+            # Error: e_t = v_t - v_hat_t
+            e_t = v_t_f32 - v_hat_t
+            
+            # NO residual scaling initially
+            
+            # Clip residual magnitude (optional safeguard requested previously, keeping just in case, but no sqrt scaling)
+            e_norm = torch.norm(e_t, dim=-1, keepdim=True)
+            e_t = torch.where(e_norm > 10.0, e_t * (10.0 / (e_norm + 1e-6)), e_t)
+            
+            # Update: S_t = S_{t-1} + e_t @ alpha_t^T
+            update_term_S = torch.matmul(e_t.unsqueeze(2), alpha_t.unsqueeze(1))
             S_t = S_t + update_term_S
             mem_step += 1
             
@@ -294,6 +302,7 @@ class VLALayer(nn.Module):
         O = torch.stack(outputs, dim=1).to(dtype=dtype)  # (B, T, d_head)
         
         # Step 6: Output Projection
+        O = self.out_norm(O)
         O = self.W_o(O)  # (B, T, d_model)
         
         if return_states:

@@ -69,6 +69,7 @@ def test_vla_small_t_reference():
         M = lambda_0 * torch.eye(d_head, device=DEVICE)
         S = torch.zeros(d_head, d_head, device=DEVICE)
         
+        outputs_b = []
         for t in range(T):
             x_t = x[b, t] # (d_model,)
             
@@ -99,22 +100,36 @@ def test_vla_small_t_reference():
             A_64 = torch.linalg.inv(M_64)
             A = A_64.to(torch.float32)
             
-            # Compute alpha_t (kept for states/reference)
-            z_t = torch.mv(A, u_t) # (d_head,)
+            # Compute alpha_t
+            # VLA uses k_t for alpha_t without scaling
+            z_t = torch.mv(A, k_t) # (d_head,)
             alpha_t = z_t # (d_head,)
             
-            # Update S (using unscaled keys u_t)
-            # S_t = S_{t-1} + v_t u_t^T
-            v_t_f32 = v_t / (torch.norm(v_t) + 1e-6)
-            S = S + torch.outer(v_t_f32, u_t)
+            # Update S with residual
+            v_t_f32 = v_t
+            v_hat_t = torch.mv(S, k_t)
+            e_t = v_t_f32 - v_hat_t
+            
+            # Clip residual magnitude
+            e_norm = torch.norm(e_t)
+            if e_norm > 10.0:
+                e_t = e_t * (10.0 / (e_norm + 1e-6))
+
+            S = S + torch.outer(e_t, alpha_t)
             
             # Output o_t with global inverse-covariance projection
             # o_t = S_t (A_t q_t)
             q_mapped = torch.mv(A, q_t)
             o_t_pre = torch.mv(S, q_mapped) # (d_head,)
             
-            # Apply W_o
-            o_t_ref = model.W_o(o_t_pre) # (d_model,)
+            outputs_b.append(o_t_pre)
+            
+        O_b = torch.stack(outputs_b, dim=0)
+        O_b = model.out_norm(O_b)
+        O_b = model.W_o(O_b)
+        
+        for t in range(T):
+            o_t_ref = O_b[t]
             
             # Compare with model output
             o_t_model = model_out[b, t]

@@ -3,15 +3,11 @@
   <p><strong>A Next-Generation Sequence Model</strong></p>
   <p>
     <strong>Vishal S. Pandey</strong><sup>1</sup> &nbsp;&bull;&nbsp; 
-    <strong>Rishav Tewari</strong><sup>1</sup> &nbsp;&bull;&nbsp; 
-    <strong>Ruzina Haque Laskar</strong><sup>2</sup>
+    <strong>Gopal Singh</strong><sup>2</sup>
   </p>
   <p>
     <sup>1</sup>DeepBrain Labs &nbsp;&nbsp;&nbsp;
-    <sup>2</sup>Center for Development of Telematics
-  </p>
-  <p>
-    <a href="https://variational-linear-attention.vercel.app/"><strong>Read the Full Documentation »</strong></a>
+    <sup>2</sup>Metriqual
   </p>
 </div>
 
