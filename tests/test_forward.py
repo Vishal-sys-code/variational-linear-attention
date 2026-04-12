@@ -99,19 +99,19 @@ def test_vla_small_t_reference():
             A_64 = torch.linalg.inv(M_64)
             A = A_64.to(torch.float32)
             
-            # Compute alpha_t
-            # alpha_t = z_t
+            # Compute alpha_t (kept for states/reference)
             z_t = torch.mv(A, u_t) # (d_head,)
             alpha_t = z_t # (d_head,)
             
-            # Update S
-            # S_t = S_{t-1} + v_t alpha_t^T
+            # Update S (using unscaled keys u_t)
+            # S_t = S_{t-1} + v_t u_t^T
             v_t_f32 = v_t / (torch.norm(v_t) + 1e-6)
-            S = S + torch.outer(v_t_f32, alpha_t)
+            S = S + torch.outer(v_t_f32, u_t)
             
-            # Output o_t
-            # o_t = S_t q_t
-            o_t_pre = torch.mv(S, q_t) # (d_head,)
+            # Output o_t with global inverse-covariance projection
+            # o_t = S_t (A_t q_t)
+            q_mapped = torch.mv(A, q_t)
+            o_t_pre = torch.mv(S, q_mapped) # (d_head,)
             
             # Apply W_o
             o_t_ref = model.W_o(o_t_pre) # (d_model,)
