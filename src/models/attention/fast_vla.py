@@ -6,15 +6,15 @@ from src.models.attention.penalty_builder import PenaltyBuilder
 
 # Try importing Triton
 try:
-    import triton
-    import triton.language as tl
+    import triton  # type: ignore
+    import triton.language as tl  # type: ignore
     HAS_TRITON = True
 except ImportError:
     HAS_TRITON = False
 
 def _combine(F_l, G_l, F_r, G_r):
     """Associative operator for the (F, G) recurrence."""
-    return torch.matmul(F_r, F_l), torch.matmul(F_r, G_l) + G_r
+    return torch.matmul(F_r, F_l).to(F_l.dtype), (torch.matmul(F_r, G_l) + G_r).to(G_l.dtype)
 
 def parallel_scan(Fs, Gs):
     """
