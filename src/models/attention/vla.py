@@ -221,20 +221,22 @@ class VLALayer(nn.Module):
                 if self.enable_stabilization and inv_step % self.inverse_tracker.period == 0:
                     A_t = A_t + periodic_add_inv
 
-            # Step 4.5: Compute alpha_t
+            # Step 4.5: Determine key for memory insertion (unscaled by A_t to avoid temporal skew)
             if u_t.dim() == 2:
                 u_vec = u_t.unsqueeze(-1)
+                k_mem = u_t
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t
+                alpha_t = z_t # kept for states
             else:
                 u_vec = u_t.sum(dim=1).unsqueeze(-1)
+                k_mem = u_t.sum(dim=1)
                 z_t = torch.bmm(A_t, u_vec).squeeze(-1)
-                alpha_t = z_t
+                alpha_t = z_t # kept for states
 
             # Step 4.6: Update memory matrix S_t
             v_t_f32 = v_t / (torch.norm(v_t, dim=-1, keepdim=True) + 1e-6)
             
-            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), alpha_t.unsqueeze(1))
+            update_term_S = torch.matmul(v_t_f32.unsqueeze(2), k_mem.unsqueeze(1))
             S_t = S_t + update_term_S
             mem_step += 1
             
@@ -256,8 +258,10 @@ class VLALayer(nn.Module):
                     mask_expanded = mask_explode.view(-1, 1, 1).expand_as(A_t)
                     A_t = torch.where(mask_expanded, A_t + fallback_add_explode, A_t)
 
-            # Step 4.7: Compute output o_t
-            o_t = torch.matmul(S_t, q_t.unsqueeze(2)).squeeze(2)
+            # Step 4.7: Compute output o_t using global covariance tracking
+            # This projects q_t into the stable Mahalanobis space defined by A_t
+            q_mapped = torch.bmm(A_t, q_t.unsqueeze(2)) 
+            o_t = torch.matmul(S_t, q_mapped).squeeze(2)
             
             outputs.append(o_t)
             
