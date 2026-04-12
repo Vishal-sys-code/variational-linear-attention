@@ -9,6 +9,7 @@ import torch.optim as optim
 from src.models.attention.vla import VLALayer
 from src.models.attention.deltanet import DeltaNetLayer
 from src.models.attention.linear_transformer import LinearTransformerLayer
+from src.models.attention.fast_vla import VLAParallel, VLATriton
 
 class CausalConv1d(nn.Module):
     """
@@ -150,7 +151,7 @@ def train_and_eval(model, args, device):
 
 def main():
     parser = argparse.ArgumentParser(description="Associative Retrieval Benchmark")
-    parser.add_argument("--model", type=str, required=True, choices=["VLA", "DeltaNet", "Linear"], help="Model architecture")
+    parser.add_argument("--model", type=str, required=True, choices=["VLA", "DeltaNet", "Linear", "VLAMamba", "VLATriton", "VLAKVExploding", "VLACombined"], help="Model architecture")
     parser.add_argument("--seq_len", type=int, required=True, help="Sequence Length")
     parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size")
@@ -169,16 +170,25 @@ def main():
     models = {
         "VLA": VLALayer,
         "DeltaNet": DeltaNetLayer,
-        "Linear": LinearTransformerLayer
+        "Linear": LinearTransformerLayer,
+        "VLAMamba": VLAParallel,
+        "VLATriton": VLATriton,
+        "VLAKVExploding": VLAParallel,
+        "VLACombined": VLATriton
     }
     
     layer_cls = models[args.model]
     
-    if args.model == "VLA":
+    if args.model in ["VLA", "VLAMamba", "VLATriton", "VLAKVExploding", "VLACombined"]:
         # Pass lambda_0=0.1 as requested by the user for stabilization
+        # and configure use_kv_exploding_fix
+        use_kv_exploding_fix = args.model in ["VLAKVExploding", "VLACombined"]
+        
         class VLALayerWithLambda(layer_cls):
             def __init__(self, *args_init, **kwargs_init):
                 kwargs_init["lambda_0"] = 0.1
+                if args.model != "VLA":
+                    kwargs_init["use_kv_exploding_fix"] = use_kv_exploding_fix
                 super().__init__(*args_init, **kwargs_init)
         model = ModelWrapper(VLALayerWithLambda, args.d_model, args.vocab_size).to(device)
     else:
