@@ -73,6 +73,38 @@ Our empirical evaluations across both Synthetic capabilities and symbolic reason
   </table>
 </div>
 
+<br/>
+
+<div align="center">
+  <h3>VLA v3 (Triton + Mamba) Benchmarks</h3>
+  <table>
+    <tr>
+      <td align="center">
+        <b>1. Multi-Query Associative Recall (MQAR)</b><br/>
+        <img src="website/static/img/vla_v3/fig1_mqar_v3.png" alt="MQAR VLA v3" width="400"/>
+        <br/><i>Perfect retrieval on 100K+ context lengths</i>
+      </td>
+      <td align="center">
+        <b>2. KV Memory Exploding Norms</b><br/>
+        <img src="website/static/img/vla_v3/fig_kv_norms_v3.png" alt="KV Norms Stability" width="400"/>
+        <br/><i>Bounding hidden states via stable dynamic retention</i>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <b>3. Throughput vs Sequence Length</b><br/>
+        <img src="website/static/img/vla_v3/fig2_throughput_v3.png" alt="VLA v3 Throughput" width="400"/>
+        <br/><i>High efficiency hardware-aware Triton scanning</i>
+      </td>
+      <td align="center">
+        <b>4. Model Scaling Laws</b><br/>
+        <img src="website/static/img/vla_v3/fig3_scaling_v3.png" alt="VLA v3 Scaling" width="400"/>
+        <br/><i>Performance as a function of model dimensions</i>
+      </td>
+    </tr>
+  </table>
+</div>
+
 *Detailed breakdown and interactive visualization tracking are available directly in our [Documentation Portal](https://variational-linear-attention.vercel.app/).*
 
 ---

@@ -68,6 +68,40 @@ The Long Range Arena is a suite of tasks specifically designed to evaluate effic
 
 ---
 
+## 4. VLA v3 (Triton + Mamba) Benchmarks
+
+The third iteration of Variational Linear Attention integrates hardware-aware Triton optimizations and Mamba-inspired scan formulations. This yields significant improvements in both training throughput and KV-state stability over extreme context lengths.
+
+### Multi-Query Associative Recall (MQAR)
+
+VLA v3 achieves perfect retrieval accuracy over significantly longer contexts (100K+) than baseline standard linear attention models, avoiding the typical capacity collapse by selectively tracking required associations.
+
+![MQAR VLA v3](/img/vla_v3/fig1_mqar_v3.png)
+*Fig 7: MQAR Performance spanning 100K+ context lengths.*
+
+### KV Memory Exploding Norms
+
+We directly address the exploding KV state problem inherent in unbounded recurrent networks. VLA v3 strictly bounds hidden state norms via stable dynamic retention.
+
+![KV Norms Stability](/img/vla_v3/fig_kv_norms_v3.png)
+*Fig 8: Norms of the KV state remain completely stable, preventing numerical overflow without sacrificing expressive capacity.*
+
+### Throughput vs Sequence Length
+
+By fusing the associative scan in Triton, VLA v3 scales highly efficiently, operating with sub-quadratic memory reads and optimized block-level matrix multiplications.
+
+![VLA v3 Throughput](/img/vla_v3/fig2_throughput_v3.png)
+*Fig 9: Throughput scaling on Triton showcasing highly efficient forward passes.*
+
+### Model Scaling Laws
+
+Performance improvements directly scale as a function of model dimensions, highlighting VLA v3's robustness when deployed in larger parameter regimes.
+
+![VLA v3 Scaling](/img/vla_v3/fig3_scaling_v3.png)
+*Fig 10: Scaling laws for VLA v3 against baseline architectures.*
+
+---
+
 ## Summary
 
 The empirical results confirm our theoretical hypotheses:
