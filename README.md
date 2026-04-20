@@ -141,6 +141,29 @@ DeepBrain Labs enforces absolute numerical precision matching theoretical limits
 pytest tests/ -v
 ```
 
+### VLA v3 (Research Implementation Notes)
+The repository now includes a dedicated `VLAv3` implementation in `src/models/attention/vla_v3.py`, aligned with the stabilized formulation from the v3 notebook:
+
+1. **Positive feature map**: `Q,K = ELU(·)+1` for non-negative linear attention features.
+2. **Learned penalty direction**: `u_t = normalize(W_u k_t^{raw})` with full gradient flow.
+3. **Stable inverse recursion**: Sherman–Morrison updates for `A_t` with periodic diagonal nudging.
+4. **Bounded fast-weight dynamics**: normalized `(k_t, α_t)` outer-product updates to control Jacobian spectrum.
+5. **Calibrated readout**: `z·q` denominator normalization at decode time.
+
+This is intended as the canonical code path for v3 ablations and reproducible MQAR-oriented experiments.
+
+#### MQAR Protocol Used in VLA v3 (from Notebook 05)
+The VLAv3 experiments are paired with a **Multi-Query Associative Recall (MQAR)** protocol, matching the setup used in `notebooks/05_VLAv3_Complete_Fix.ipynb`:
+
+- **Sequence construction**: a context of interleaved key/value symbols followed by multiple key-only queries.
+- **Training target**: each query key must retrieve its associated value token exactly.
+- **Canonical default in notebook**: `d_model=64`, `vocab_size=64`, `num_pairs=8`, with cosine LR schedule and warmup.
+- **Reported analyses**: (i) MQAR training curves, (ii) scaling vs `d_model`, (iii) scaling vs number of key-value pairs.
+- **Why MQAR matters for v3**: it stress-tests selective long-context retrieval under linear-time state updates, where bounded `S_t` and stable `A_t` dynamics are required for robust recall.
+
+If you want to reproduce the paper-style v3 figures, run the full workflow in `notebooks/05_VLAv3_Complete_Fix.ipynb` and compare against the saved artifacts in `notebooks/vla_v3_results/`.
+
+
 ### 3. Local Documentation Server
 Want to read the interactive math and architectural deep dives? Boot the local Docusaurus server:
 ```bash
