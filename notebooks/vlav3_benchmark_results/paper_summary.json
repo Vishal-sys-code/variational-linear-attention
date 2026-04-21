@@ -1,0 +1,199 @@
+{
+  "device": "cuda",
+  "seed": 42,
+  "model_config": {
+    "d_model": 128,
+    "n_heads": 4,
+    "n_layers": 2,
+    "d_ff": 256,
+    "dropout": 0.0,
+    "vocab_size": 128,
+    "max_seq_len": 2048
+  },
+  "train_config": {
+    "batch_size": 32,
+    "steps": 300,
+    "lr": 0.0003,
+    "weight_decay": 0.01,
+    "grad_clip": 1.0,
+    "log_every": 25
+  },
+  "experiment_1_scaling": [
+    {
+      "model": "softmax",
+      "seq_len": 256,
+      "forward_sec": 0.005237984250000239,
+      "tokens_per_sec": 390990.1027289089
+    },
+    {
+      "model": "softmax",
+      "seq_len": 512,
+      "forward_sec": 0.005443678624999393,
+      "tokens_per_sec": 752432.3682867037
+    },
+    {
+      "model": "softmax",
+      "seq_len": 1024,
+      "forward_sec": 0.01564598302500002,
+      "tokens_per_sec": 523584.8707563064
+    },
+    {
+      "model": "softmax",
+      "seq_len": 2048,
+      "forward_sec": 0.05597315309999971,
+      "tokens_per_sec": 292711.75720133027
+    },
+    {
+      "model": "linear",
+      "seq_len": 256,
+      "forward_sec": 0.20243870570000128,
+      "tokens_per_sec": 10116.642432178853
+    },
+    {
+      "model": "linear",
+      "seq_len": 512,
+      "forward_sec": 0.3971483396250008,
+      "tokens_per_sec": 10313.526688459946
+    },
+    {
+      "model": "linear",
+      "seq_len": 1024,
+      "forward_sec": 0.810262894524999,
+      "tokens_per_sec": 10110.298836777416
+    },
+    {
+      "model": "linear",
+      "seq_len": 2048,
+      "forward_sec": 1.5305102922999994,
+      "tokens_per_sec": 10704.926378102742
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 256,
+      "forward_sec": 0.46606815447500194,
+      "tokens_per_sec": 4394.207113993768
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 512,
+      "forward_sec": 0.9692495597000004,
+      "tokens_per_sec": 4225.94981757617
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 1024,
+      "forward_sec": 1.878074750075001,
+      "tokens_per_sec": 4361.913709596944
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 2048,
+      "forward_sec": 3.7541058324749996,
+      "tokens_per_sec": 4364.288256945167
+    },
+    {
+      "model": "vla",
+      "seq_len": 256,
+      "forward_sec": 0.8118924388750003,
+      "tokens_per_sec": 2522.5016294496027
+    },
+    {
+      "model": "vla",
+      "seq_len": 512,
+      "forward_sec": 1.528986293525,
+      "tokens_per_sec": 2678.899096313598
+    },
+    {
+      "model": "vla",
+      "seq_len": 1024,
+      "forward_sec": 3.022980824300004,
+      "tokens_per_sec": 2709.908026590584
+    },
+    {
+      "model": "vla",
+      "seq_len": 2048,
+      "forward_sec": 6.056050474625005,
+      "tokens_per_sec": 2705.3935677467266
+    }
+  ],
+  "experiment_2_stability_tail": [
+    {
+      "S_norm": NaN,
+      "A_norm": NaN
+    },
+    {
+      "S_norm": 5546.0146484375,
+      "A_norm": NaN
+    },
+    {
+      "S_norm": 25.580421447753906,
+      "A_norm": 3657.7578125
+    },
+    {
+      "S_norm": 31.440820693969727,
+      "A_norm": 0.4774271547794342
+    }
+  ],
+  "experiment_3_behavior": [
+    {
+      "model": "softmax",
+      "seq_len": 256,
+      "accuracy": 0.007853139459621161
+    },
+    {
+      "model": "softmax",
+      "seq_len": 512,
+      "accuracy": 0.007779227626160718
+    },
+    {
+      "model": "softmax",
+      "seq_len": 1024,
+      "accuracy": 0.0076854187250137325
+    },
+    {
+      "model": "linear",
+      "seq_len": 256,
+      "accuracy": 0.00701233227737248
+    },
+    {
+      "model": "linear",
+      "seq_len": 512,
+      "accuracy": 0.008108037747442723
+    },
+    {
+      "model": "linear",
+      "seq_len": 1024,
+      "accuracy": 0.008186175446026027
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 256,
+      "accuracy": 0.008206278365105391
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 512,
+      "accuracy": 0.0074660753179341555
+    },
+    {
+      "model": "deltanet",
+      "seq_len": 1024,
+      "accuracy": 0.007907416634261609
+    },
+    {
+      "model": "vla",
+      "seq_len": 256,
+      "accuracy": 0.017040359638631344
+    },
+    {
+      "model": "vla",
+      "seq_len": 512,
+      "accuracy": 0.01565501097589731
+    },
+    {
+      "model": "vla",
+      "seq_len": 1024,
+      "accuracy": 0.014067860543727875
+    }
+  ]
+}
