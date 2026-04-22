@@ -76,30 +76,31 @@ Our empirical evaluations across both Synthetic capabilities and symbolic reason
 <br/>
 
 <div align="center">
-  <h3>VLA v3 (Triton + Mamba) Benchmarks</h3>
+  <h3>VLA v3 Advanced Benchmarks & Stability</h3>
+  <p><em>Latest empirical results from <code>notebooks/07-vlav3-benchmark-fixed.ipynb</code></em></p>
   <table>
     <tr>
       <td align="center">
-        <b>1. Multi-Query Associative Recall (MQAR)</b><br/>
-        <img src="website/static/img/vla_v3/fig1_mqar_v3.png" alt="MQAR VLA v3" width="400"/>
-        <br/><i>Perfect retrieval on 100K+ context lengths</i>
+        <b>1. Linear O(T) Scaling Behavior</b><br/>
+        <img src="notebooks/vlav3_benchmarks/scaling_behaviour.png" alt="Scaling Behavior" width="400"/>
+        <br/><i>VLA maintains strict linear-time step updates regardless of sequence length.</i>
       </td>
       <td align="center">
-        <b>2. KV Memory Exploding Norms</b><br/>
-        <img src="website/static/img/vla_v3/fig_kv_norms_v3.png" alt="KV Norms Stability" width="400"/>
-        <br/><i>Bounding hidden states via stable dynamic retention</i>
+        <b>2. Inversion Stability Tracking</b><br/>
+        <img src="notebooks/vlav3_benchmarks/stablity_tracking.png" alt="KV Norms Stability" width="400"/>
+        <br/><i>KV state ratio (LA/VLA) is ~113x. VLA dynamically bounds exploding states.</i>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <b>3. Throughput vs Sequence Length</b><br/>
-        <img src="website/static/img/vla_v3/fig2_throughput_v3.png" alt="VLA v3 Throughput" width="400"/>
-        <br/><i>High efficiency hardware-aware Triton scanning</i>
+        <b>3. MQAR Capacity Curve</b><br/>
+        <img src="notebooks/vlav3_benchmarks/mqar_capacity_curve.png" alt="MQAR Capacity Curve" width="400"/>
+        <br/><i>VLA hits 100% accuracy on complex associative recall while standard models crash to ~7%.</i>
       </td>
       <td align="center">
-        <b>4. Model Scaling Laws</b><br/>
-        <img src="website/static/img/vla_v3/fig3_scaling_v3.png" alt="VLA v3 Scaling" width="400"/>
-        <br/><i>Performance as a function of model dimensions</i>
+        <b>4. MQAR Long-Context Accuracy</b><br/>
+        <img src="notebooks/vlav3_benchmarks/mqar_accuracy_vs_sequence_length.png" alt="MQAR Acc vs Seq Len" width="400"/>
+        <br/><i>VLA sustains 98.2% accuracy across 512 context lengths compared to Softmax failing at ~15%.</i>
       </td>
     </tr>
   </table>
@@ -152,16 +153,16 @@ The repository now includes a dedicated `VLAv3` implementation in `src/models/at
 
 This is intended as the canonical code path for v3 ablations and reproducible MQAR-oriented experiments.
 
-#### MQAR Protocol Used in VLA v3 (from Notebook 05)
-The VLAv3 experiments are paired with a **Multi-Query Associative Recall (MQAR)** protocol, matching the setup used in `notebooks/05_VLAv3_Complete_Fix.ipynb`:
+#### Comprehensive Benchmarks (from Notebook 07)
+The VLAv3 architecture undergoes rigorous stress-testing against standard Softmax, Linear Attention, and DeltaNet in `notebooks/07-vlav3-benchmark-fixed.ipynb`.
 
-- **Sequence construction**: a context of interleaved key/value symbols followed by multiple key-only queries.
-- **Training target**: each query key must retrieve its associated value token exactly.
-- **Canonical default in notebook**: `d_model=64`, `vocab_size=64`, `num_pairs=8`, with cosine LR schedule and warmup.
-- **Reported analyses**: (i) MQAR training curves, (ii) scaling vs `d_model`, (iii) scaling vs number of key-value pairs.
-- **Why MQAR matters for v3**: it stress-tests selective long-context retrieval under linear-time state updates, where bounded `S_t` and stable `A_t` dynamics are required for robust recall.
+- **Scaling Benchmark**: Proves VLA runs in $\mathcal{O}(T)$ constant time per token, avoiding the $\mathcal{O}(T^2)$ slowdown of Softmax.
+- **Stability Tracking**: Tracks the internal hidden states ($S_t$). Standard Linear Attention explodes to $1633.9$ norms, while VLA bounds this dynamically to $14.5$ ($113\times$ reduction).
+- **Copy Task & Basic Learning**: Confirms VLA possesses pristine gradient flow to solve deterministic recall in $<2000$ steps.
+- **MQAR Capacity Curve**: VLA dominates high-density memory retrieval ($24$ pairs, seq len $73$) with **$1.000$ accuracy**, completely destroying Softmax ($0.074$), Linear ($0.075$), and DeltaNet ($0.010$).
+- **Long-Context MQAR**: Sustains retrieval capacity out to $512+$ context lengths with $0.982$ accuracy.
 
-If you want to reproduce the paper-style v3 figures, run the full workflow in `notebooks/05_VLAv3_Complete_Fix.ipynb` and compare against the saved artifacts in `notebooks/vla_v3_results/`.
+If you want to reproduce the paper-style v3 figures and data, run the full workflow in `notebooks/07-vlav3-benchmark-fixed.ipynb` and compare against the saved artifacts in the `notebooks/vlav3_benchmarks/` directory.
 
 
 ### 3. Local Documentation Server
