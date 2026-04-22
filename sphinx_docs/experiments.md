@@ -68,6 +68,36 @@ The Long Range Arena is a suite of tasks specifically designed to evaluate effic
 
 ---
 
+## 4. VLA v3 Advanced Benchmarks & Stability
+
+Our latest `v3` formulation (incorporating Triton and Mamba integration components) undergoes rigorous stress-testing against standard baseline sequence models. These benchmarks demonstrate the strict linear-time capability, dynamic stability, and extreme retrieval capabilities of VLA on Multi-Query Associative Recall (MQAR).
+
+### Linear Scaling & Hardware Efficiency
+
+VLA achieves strict $\mathcal{O}(T)$ linear-time performance per token, avoiding the $\mathcal{O}(T^2)$ slowdown of Softmax Attention.
+
+![Scaling Behavior](_static/img/vla_v3/scaling_behaviour.png)
+*Fig 7: VLA maintains constant throughput scaling natively as sequence length grows, outperforming dense attention models.*
+
+### Inversion Stability Tracking
+
+A central limitation of Linear Attention is exploding memory norms. Tracking the internal hidden states ($S_t$) reveals that VLA successfully bounds exponential state explosion.
+
+![Stability Tracking](_static/img/vla_v3/stablity_tracking.png)
+*Fig 8: Standard Linear Attention explodes to extreme state norms, whereas VLA dynamically bounds state norms ($113\times$ reduction).*
+
+### Multi-Query Associative Recall (MQAR)
+
+We evaluate capacity on high-density memory retrieval tasks where models must associate multiple key-value pairs accurately across long contexts.
+
+![MQAR Capacity Curve](_static/img/vla_v3/mqar_capacity_curve.png)
+*Fig 9: VLA successfully manages multi-pair associative recall at 100% capacity where DeltaNet and Linear baselines fail entirely.*
+
+![MQAR Accuracy vs Sequence Length](_static/img/vla_v3/mqar_accuracy_vs_sequence_length.png)
+*Fig 10: VLA sustains $0.982$ accuracy well out to $512+$ context lengths, showing zero capacity degradation compared to Softmax ($~15\%$).*
+
+---
+
 ## Summary
 
 The empirical results confirm our theoretical hypotheses:
