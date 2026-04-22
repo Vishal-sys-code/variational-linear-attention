@@ -30,7 +30,7 @@ This documentation is designed to serve as both a rigorous mathematical referenc
 
 -   **[Theory & Mathematics](./maths.md)**: Deep dive into the core mathematical primitives, including the Sherman-Morrison updates and optimal coefficient derivations.
 -   **[API Manual](./api/vla_core.md)**: Detailed technical specifications for implementing and utilizing VLA Core, DeltaNet, and Linear Transformer baselines.
--   **[Experiments](./experiments.md)**: Comprehensive analysis of our synthetic tasks (Copy, Delayed Recall) and Long Range Arena (LRA) benchmarks, demonstrating VLA's superiority.
+-   **[Experiments](./experiments.md)**: Comprehensive analysis of our synthetic tasks (Copy, Delayed Recall), Long Range Arena (LRA) benchmarks, and the latest VLA v3 (Triton + Mamba) Multi-Query Associative Recall (MQAR) tests demonstrating VLA's superiority.
 -   **[Getting Started](./running.md)**: Practical instructions on how to set up the environment, run experiments, and reproduce our plots.
 
 Explore the sections via the sidebar to understand how Variational Linear Attention redefines efficient sequence modeling.
