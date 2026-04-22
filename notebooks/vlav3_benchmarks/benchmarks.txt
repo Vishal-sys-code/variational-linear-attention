@@ -1,0 +1,418 @@
+ 
+============================================================
+EXPERIMENT 1: SCALING BENCHMARK
+============================================================
+Model            L        ms       tok/s
+------------------------------------------
+softmax        128       1.4      746114
+softmax        256       2.3      872690
+softmax        512       5.6      727507
+softmax       1024      15.6      526148
+softmax       2048      55.9      293082
+linear         128      52.7       19416
+linear         256     103.6       19760
+linear         512     208.0       19694
+linear        1024     431.9       18968
+linear        2048     832.7       19675
+deltanet       128      57.9       17700
+deltanet       256     113.3       18078
+deltanet       512     227.8       17981
+deltanet      1024     456.3       17953
+deltanet      2048     919.6       17817
+vla            128     180.5        5674
+vla            256     363.9        5627
+vla            512     708.5        5781
+vla           1024    1422.3        5760
+vla           2048    2793.1        5866
+✅ Experiment 1 done
+
+
+ 
+============================================================
+EXPERIMENT 2: STABILITY TRACKING
+============================================================
+  linear      S_final=1633.9316  A_final=n/a
+  deltanet    S_final=1.2154  A_final=n/a
+  vla         S_final=14.5177  A_final=12.293929100036621
+✅ Experiment 2 done
+
+
+ 
+============================================================
+EXPERIMENT 3A: COPY TASK  (basic learning signal)
+============================================================
+
+Training softmax on copy task...
+  [softmax   ] step=    1 loss=4.1428 acc=0.761 best=0.761 0s
+  [softmax   ] step=  150 loss=0.7068 acc=1.000 best=1.000 1s
+  [softmax   ] step=  300 loss=0.0588 acc=1.000 best=1.000 2s
+  [softmax   ] step=  450 loss=0.0253 acc=1.000 best=1.000 3s
+  [softmax   ] step=  600 loss=0.0153 acc=1.000 best=1.000 4s
+  [softmax   ] step=  750 loss=0.0111 acc=1.000 best=1.000 5s
+  [softmax   ] step=  900 loss=0.0089 acc=1.000 best=1.000 6s
+  [softmax   ] step= 1050 loss=0.0078 acc=1.000 best=1.000 7s
+  [softmax   ] step= 1200 loss=0.0072 acc=1.000 best=1.000 8s
+  [softmax   ] step= 1350 loss=0.0069 acc=1.000 best=1.000 9s
+  [softmax   ] step= 1500 loss=0.0069 acc=1.000 best=1.000 9s
+  Final copy accuracy: 1.000
+
+Training linear on copy task...
+  [linear    ] step=    1 loss=4.1428 acc=0.763 best=0.763 0s
+  [linear    ] step=  150 loss=0.7182 acc=1.000 best=1.000 18s
+  [linear    ] step=  300 loss=0.0583 acc=1.000 best=1.000 35s
+  [linear    ] step=  450 loss=0.0250 acc=1.000 best=1.000 53s
+  [linear    ] step=  600 loss=0.0152 acc=1.000 best=1.000 70s
+  [linear    ] step=  750 loss=0.0110 acc=1.000 best=1.000 88s
+  [linear    ] step=  900 loss=0.0088 acc=1.000 best=1.000 105s
+  [linear    ] step= 1050 loss=0.0077 acc=1.000 best=1.000 122s
+  [linear    ] step= 1200 loss=0.0071 acc=1.000 best=1.000 139s
+  [linear    ] step= 1350 loss=0.0069 acc=1.000 best=1.000 157s
+  [linear    ] step= 1500 loss=0.0069 acc=1.000 best=1.000 174s
+  Final copy accuracy: 1.000
+
+Training deltanet on copy task...
+  [deltanet  ] step=    1 loss=4.3644 acc=0.387 best=0.387 0s
+  [deltanet  ] step=  150 loss=0.6384 acc=1.000 best=1.000 20s
+  [deltanet  ] step=  300 loss=0.0800 acc=1.000 best=1.000 39s
+  [deltanet  ] step=  450 loss=0.0346 acc=1.000 best=1.000 59s
+  [deltanet  ] step=  600 loss=0.0211 acc=1.000 best=1.000 78s
+  [deltanet  ] step=  750 loss=0.0151 acc=1.000 best=1.000 98s
+  [deltanet  ] step=  900 loss=0.0121 acc=1.000 best=1.000 117s
+  [deltanet  ] step= 1050 loss=0.0106 acc=1.000 best=1.000 137s
+  [deltanet  ] step= 1200 loss=0.0098 acc=1.000 best=1.000 156s
+  [deltanet  ] step= 1350 loss=0.0095 acc=1.000 best=1.000 175s
+  [deltanet  ] step= 1500 loss=0.0094 acc=1.000 best=1.000 195s
+  Final copy accuracy: 1.000
+
+Training vla on copy task...
+  [vla       ] step=    1 loss=4.3326 acc=0.465 best=0.465 0s
+  [vla       ] step=  150 loss=0.6351 acc=1.000 best=1.000 56s
+  [vla       ] step=  300 loss=0.0805 acc=1.000 best=1.000 113s
+  [vla       ] step=  450 loss=0.0345 acc=1.000 best=1.000 170s
+  [vla       ] step=  600 loss=0.0208 acc=1.000 best=1.000 227s
+  [vla       ] step=  750 loss=0.0149 acc=1.000 best=1.000 283s
+  [vla       ] step=  900 loss=0.0119 acc=1.000 best=1.000 340s
+  [vla       ] step= 1050 loss=0.0104 acc=1.000 best=1.000 397s
+  [vla       ] step= 1200 loss=0.0096 acc=1.000 best=1.000 454s
+  [vla       ] step= 1350 loss=0.0093 acc=1.000 best=1.000 511s
+  [vla       ] step= 1500 loss=0.0093 acc=1.000 best=1.000 568s
+  Final copy accuracy: 1.000
+✅ Experiment 3A done
+
+
+ 
+============================================================
+EXPERIMENT 3B: MQAR CAPACITY CURVE  (VLA advantage zone)
+============================================================
+
+--- n_pairs=4  seq_len=13 ---
+  [softmax   ] step=    1 loss=4.9088 acc=0.012 best=0.012 0s
+  [softmax   ] step=  300 loss=3.5473 acc=0.234 best=0.234 8s
+  [softmax   ] step=  600 loss=2.6543 acc=0.266 best=0.266 16s
+  [softmax   ] step=  900 loss=2.2293 acc=0.332 best=0.332 23s
+  [softmax   ] step= 1200 loss=2.0046 acc=0.266 best=0.332 31s
+  [softmax   ] step= 1500 loss=1.9968 acc=0.262 best=0.332 39s
+  [softmax   ] step= 1800 loss=1.9275 acc=0.266 best=0.332 47s
+  [softmax   ] step= 2100 loss=1.8485 acc=0.254 best=0.332 55s
+  [softmax   ] step= 2400 loss=1.8071 acc=0.273 best=0.332 63s
+  [softmax   ] step= 2700 loss=1.8241 acc=0.273 best=0.332 71s
+  [softmax   ] step= 3000 loss=1.8784 acc=0.312 best=0.332 78s
+  softmax     train_best=0.332  eval=0.255
+  [linear    ] step=    1 loss=4.9093 acc=0.012 best=0.012 0s
+  [linear    ] step=  300 loss=3.5592 acc=0.230 best=0.230 15s
+  [linear    ] step=  600 loss=2.5667 acc=0.246 best=0.246 29s
+  [linear    ] step=  900 loss=2.1762 acc=0.312 best=0.312 44s
+  [linear    ] step= 1200 loss=1.9437 acc=0.238 best=0.312 58s
+  [linear    ] step= 1500 loss=1.9338 acc=0.262 best=0.312 73s
+  [linear    ] step= 1800 loss=1.8974 acc=0.254 best=0.312 87s
+  [linear    ] step= 2100 loss=1.8188 acc=0.258 best=0.312 102s
+  [linear    ] step= 2400 loss=1.8159 acc=0.250 best=0.312 117s
+  [linear    ] step= 2700 loss=1.7891 acc=0.273 best=0.312 132s
+  [linear    ] step= 3000 loss=1.8229 acc=0.293 best=0.312 146s
+  linear      train_best=0.312  eval=0.260
+  [deltanet  ] step=    1 loss=4.8667 acc=0.008 best=0.008 0s
+  [deltanet  ] step=  300 loss=4.0170 acc=0.266 best=0.266 16s
+  [deltanet  ] step=  600 loss=2.7889 acc=0.281 best=0.281 32s
+  [deltanet  ] step=  900 loss=2.2759 acc=0.230 best=0.281 47s
+  [deltanet  ] step= 1200 loss=1.9709 acc=0.262 best=0.281 63s
+  [deltanet  ] step= 1500 loss=1.0578 acc=0.539 best=0.539 79s
+  [deltanet  ] step= 1800 loss=0.7705 acc=0.676 best=0.676 95s
+  [deltanet  ] step= 2100 loss=0.3888 acc=0.898 best=0.898 111s
+  [deltanet  ] step= 2400 loss=0.1650 acc=0.957 best=0.957 127s
+  [deltanet  ] step= 2700 loss=0.1298 acc=0.973 best=0.973 143s
+  [deltanet  ] step= 3000 loss=0.0932 acc=0.980 best=0.980 158s
+  deltanet    train_best=0.980  eval=0.989
+  [vla       ] step=    1 loss=4.8774 acc=0.012 best=0.012 0s
+  [vla       ] step=  300 loss=3.8006 acc=0.234 best=0.234 31s
+  [vla       ] step=  600 loss=2.5299 acc=0.316 best=0.316 62s
+  [vla       ] step=  900 loss=0.0774 acc=1.000 best=1.000 93s
+  [vla       ] step= 1200 loss=0.0173 acc=1.000 best=1.000 124s
+  [vla       ] step= 1500 loss=0.0095 acc=1.000 best=1.000 155s
+  [vla       ] step= 1800 loss=0.0066 acc=1.000 best=1.000 186s
+  [vla       ] step= 2100 loss=0.0054 acc=1.000 best=1.000 215s
+  [vla       ] step= 2400 loss=0.0049 acc=1.000 best=1.000 245s
+  [vla       ] step= 2700 loss=0.0046 acc=1.000 best=1.000 276s
+  [vla       ] step= 3000 loss=0.0046 acc=1.000 best=1.000 307s
+  vla         train_best=1.000  eval=1.000
+
+--- n_pairs=8  seq_len=25 ---
+  [softmax   ] step=    1 loss=4.8697 acc=0.016 best=0.016 0s
+  [softmax   ] step=  300 loss=4.0470 acc=0.154 best=0.154 10s
+  [softmax   ] step=  600 loss=3.4805 acc=0.174 best=0.174 20s
+  [softmax   ] step=  900 loss=3.2033 acc=0.160 best=0.174 30s
+  [softmax   ] step= 1200 loss=2.9751 acc=0.162 best=0.174 40s
+  [softmax   ] step= 1500 loss=3.0292 acc=0.121 best=0.174 51s
+  [softmax   ] step= 1800 loss=2.9538 acc=0.150 best=0.174 61s
+  [softmax   ] step= 2100 loss=2.8842 acc=0.164 best=0.174 71s
+  [softmax   ] step= 2400 loss=2.8263 acc=0.141 best=0.174 81s
+  [softmax   ] step= 2700 loss=2.9003 acc=0.123 best=0.174 91s
+  [softmax   ] step= 3000 loss=2.8492 acc=0.172 best=0.174 102s
+  softmax     train_best=0.174  eval=0.146
+  [linear    ] step=    1 loss=4.8697 acc=0.016 best=0.016 0s
+  [linear    ] step=  300 loss=4.0448 acc=0.143 best=0.143 24s
+  [linear    ] step=  600 loss=3.4313 acc=0.170 best=0.170 46s
+  [linear    ] step=  900 loss=3.1732 acc=0.160 best=0.170 69s
+  [linear    ] step= 1200 loss=2.9342 acc=0.150 best=0.170 92s
+  [linear    ] step= 1500 loss=3.0054 acc=0.127 best=0.170 114s
+  [linear    ] step= 1800 loss=2.9430 acc=0.145 best=0.170 137s
+  [linear    ] step= 2100 loss=2.8816 acc=0.160 best=0.170 160s
+  [linear    ] step= 2400 loss=2.8284 acc=0.129 best=0.170 183s
+  [linear    ] step= 2700 loss=2.9061 acc=0.111 best=0.170 206s
+  [linear    ] step= 3000 loss=2.8341 acc=0.168 best=0.170 229s
+  linear      train_best=0.170  eval=0.143
+  [deltanet  ] step=    1 loss=4.8579 acc=0.012 best=0.012 0s
+  [deltanet  ] step=  300 loss=4.8687 acc=0.002 best=0.012 25s
+  [deltanet  ] step=  600 loss=4.1076 acc=0.100 best=0.100 50s
+  [deltanet  ] step=  900 loss=3.5551 acc=0.133 best=0.133 75s
+  [deltanet  ] step= 1200 loss=3.2836 acc=0.139 best=0.139 100s
+  [deltanet  ] step= 1500 loss=3.1860 acc=0.154 best=0.154 126s
+  [deltanet  ] step= 1800 loss=3.1567 acc=0.131 best=0.154 151s
+  [deltanet  ] step= 2100 loss=1.7913 acc=0.658 best=0.658 176s
+  [deltanet  ] step= 2400 loss=1.3807 acc=0.715 best=0.715 202s
+  [deltanet  ] step= 2700 loss=1.3302 acc=0.707 best=0.715 227s
+  [deltanet  ] step= 3000 loss=1.1701 acc=0.727 best=0.727 252s
+  deltanet    train_best=0.727  eval=0.734
+  [vla       ] step=    1 loss=4.8779 acc=0.008 best=0.008 0s
+  [vla       ] step=  300 loss=4.7901 acc=0.029 best=0.029 53s
+  [vla       ] step=  600 loss=3.5885 acc=0.127 best=0.127 106s
+  [vla       ] step=  900 loss=3.0524 acc=0.160 best=0.160 159s
+  [vla       ] step= 1200 loss=0.2732 acc=0.998 best=0.998 213s
+  [vla       ] step= 1500 loss=0.0348 acc=1.000 best=1.000 267s
+  [vla       ] step= 1800 loss=0.0143 acc=1.000 best=1.000 321s
+  [vla       ] step= 2100 loss=0.0100 acc=1.000 best=1.000 375s
+  [vla       ] step= 2400 loss=0.0089 acc=1.000 best=1.000 430s
+  [vla       ] step= 2700 loss=0.0074 acc=1.000 best=1.000 485s
+  [vla       ] step= 3000 loss=0.0074 acc=1.000 best=1.000 539s
+  vla         train_best=1.000  eval=1.000
+
+--- n_pairs=12  seq_len=37 ---
+  [softmax   ] step=    1 loss=4.8676 acc=0.007 best=0.007 0s
+  [softmax   ] step=  300 loss=4.2598 acc=0.096 best=0.096 12s
+  [softmax   ] step=  600 loss=3.8365 acc=0.105 best=0.105 24s
+  [softmax   ] step=  900 loss=3.5134 acc=0.141 best=0.141 35s
+  [softmax   ] step= 1200 loss=3.4363 acc=0.122 best=0.141 47s
+  [softmax   ] step= 1500 loss=3.4643 acc=0.109 best=0.141 59s
+  [softmax   ] step= 1800 loss=3.3771 acc=0.100 best=0.141 71s
+  [softmax   ] step= 2100 loss=3.4651 acc=0.095 best=0.141 83s
+  [softmax   ] step= 2400 loss=3.2826 acc=0.150 best=0.150 94s
+  [softmax   ] step= 2700 loss=3.3215 acc=0.125 best=0.150 106s
+  [softmax   ] step= 3000 loss=3.3310 acc=0.094 best=0.150 118s
+  softmax     train_best=0.150  eval=0.109
+  [linear    ] step=    1 loss=4.8676 acc=0.007 best=0.007 0s
+  [linear    ] step=  300 loss=4.2556 acc=0.100 best=0.100 30s
+  [linear    ] step=  600 loss=3.7942 acc=0.100 best=0.100 60s
+  [linear    ] step=  900 loss=3.4771 acc=0.146 best=0.146 92s
+  [linear    ] step= 1200 loss=3.4197 acc=0.120 best=0.146 124s
+  [linear    ] step= 1500 loss=3.4754 acc=0.118 best=0.146 156s
+  [linear    ] step= 1800 loss=3.3872 acc=0.109 best=0.146 187s
+  [linear    ] step= 2100 loss=3.4762 acc=0.098 best=0.146 219s
+  [linear    ] step= 2400 loss=3.3045 acc=0.143 best=0.146 251s
+  [linear    ] step= 2700 loss=3.3479 acc=0.133 best=0.146 282s
+  [linear    ] step= 3000 loss=3.3656 acc=0.102 best=0.146 314s
+  linear      train_best=0.146  eval=0.109
+  [deltanet  ] step=    1 loss=4.8731 acc=0.003 best=0.003 0s
+  [deltanet  ] step=  300 loss=4.8558 acc=0.008 best=0.008 34s
+  [deltanet  ] step=  600 loss=4.8543 acc=0.007 best=0.008 68s
+  [deltanet  ] step=  900 loss=4.8475 acc=0.010 best=0.010 103s
+  [deltanet  ] step= 1200 loss=4.3684 acc=0.061 best=0.061 138s
+  [deltanet  ] step= 1500 loss=4.2074 acc=0.073 best=0.073 172s
+  [deltanet  ] step= 1800 loss=3.9914 acc=0.113 best=0.113 206s
+  [deltanet  ] step= 2100 loss=4.0631 acc=0.077 best=0.113 240s
+  [deltanet  ] step= 2400 loss=3.8696 acc=0.111 best=0.113 275s
+  [deltanet  ] step= 2700 loss=3.8778 acc=0.108 best=0.113 309s
+  [deltanet  ] step= 3000 loss=3.9523 acc=0.077 best=0.113 344s
+  deltanet    train_best=0.113  eval=0.097
+  [vla       ] step=    1 loss=4.8786 acc=0.004 best=0.004 0s
+  [vla       ] step=  300 loss=4.6268 acc=0.046 best=0.046 78s
+  [vla       ] step=  600 loss=3.8313 acc=0.108 best=0.108 156s
+  [vla       ] step=  900 loss=1.7575 acc=0.889 best=0.889 234s
+  [vla       ] step= 1200 loss=0.5510 acc=0.992 best=0.992 311s
+  [vla       ] step= 1500 loss=0.1349 acc=1.000 best=1.000 388s
+  [vla       ] step= 1800 loss=0.0396 acc=1.000 best=1.000 466s
+  [vla       ] step= 2100 loss=0.0175 acc=1.000 best=1.000 544s
+  [vla       ] step= 2400 loss=0.0146 acc=1.000 best=1.000 619s
+  [vla       ] step= 2700 loss=0.0116 acc=1.000 best=1.000 692s
+  [vla       ] step= 3000 loss=0.0107 acc=1.000 best=1.000 769s
+  vla         train_best=1.000  eval=1.000
+
+--- n_pairs=16  seq_len=49 ---
+  [softmax   ] step=    1 loss=4.8684 acc=0.011 best=0.011 0s
+  [softmax   ] step=  300 loss=4.3885 acc=0.061 best=0.061 14s
+  [softmax   ] step=  600 loss=4.0910 acc=0.066 best=0.066 29s
+  [softmax   ] step=  900 loss=3.8621 acc=0.088 best=0.088 43s
+  [softmax   ] step= 1200 loss=3.7864 acc=0.094 best=0.094 58s
+  [softmax   ] step= 1500 loss=3.7595 acc=0.092 best=0.094 72s
+  [softmax   ] step= 1800 loss=3.6395 acc=0.108 best=0.108 87s
+  [softmax   ] step= 2100 loss=3.6709 acc=0.097 best=0.108 101s
+  [softmax   ] step= 2400 loss=3.6664 acc=0.080 best=0.108 115s
+  [softmax   ] step= 2700 loss=3.6248 acc=0.094 best=0.108 130s
+  [softmax   ] step= 3000 loss=3.6092 acc=0.088 best=0.108 144s
+  softmax     train_best=0.108  eval=0.100
+  [linear    ] step=    1 loss=4.8686 acc=0.012 best=0.012 0s
+  [linear    ] step=  300 loss=4.3802 acc=0.076 best=0.076 40s
+  [linear    ] step=  600 loss=4.0662 acc=0.063 best=0.076 78s
+  [linear    ] step=  900 loss=3.8490 acc=0.088 best=0.088 118s
+  [linear    ] step= 1200 loss=3.7769 acc=0.093 best=0.093 156s
+  [linear    ] step= 1500 loss=3.7629 acc=0.089 best=0.093 193s
+  [linear    ] step= 1800 loss=3.6705 acc=0.102 best=0.102 231s
+  [linear    ] step= 2100 loss=3.7020 acc=0.096 best=0.102 271s
+  [linear    ] step= 2400 loss=3.7125 acc=0.075 best=0.102 309s
+  [linear    ] step= 2700 loss=3.6524 acc=0.105 best=0.105 347s
+  [linear    ] step= 3000 loss=3.6547 acc=0.092 best=0.105 385s
+  linear      train_best=0.105  eval=0.097
+  [deltanet  ] step=    1 loss=4.8880 acc=0.005 best=0.005 0s
+  [deltanet  ] step=  300 loss=4.8540 acc=0.006 best=0.006 44s
+  [deltanet  ] step=  600 loss=4.8439 acc=0.005 best=0.006 87s
+  [deltanet  ] step=  900 loss=4.8453 acc=0.012 best=0.012 131s
+  [deltanet  ] step= 1200 loss=4.8355 acc=0.013 best=0.013 174s
+  [deltanet  ] step= 1500 loss=4.7302 acc=0.022 best=0.022 218s
+  [deltanet  ] step= 1800 loss=4.6741 acc=0.028 best=0.028 262s
+  [deltanet  ] step= 2100 loss=4.6129 acc=0.037 best=0.037 305s
+  [deltanet  ] step= 2400 loss=4.6215 acc=0.026 best=0.037 349s
+  [deltanet  ] step= 2700 loss=4.5911 acc=0.031 best=0.037 393s
+  [deltanet  ] step= 3000 loss=4.5742 acc=0.019 best=0.037 436s
+  deltanet    train_best=0.037  eval=0.038
+  [vla       ] step=    1 loss=4.8836 acc=0.007 best=0.007 0s
+  [vla       ] step=  300 loss=4.8531 acc=0.008 best=0.008 102s
+  [vla       ] step=  600 loss=4.1113 acc=0.078 best=0.078 204s
+  [vla       ] step=  900 loss=1.6089 acc=0.938 best=0.938 302s
+  [vla       ] step= 1200 loss=0.2574 acc=1.000 best=1.000 399s
+  [vla       ] step= 1500 loss=0.0427 acc=1.000 best=1.000 498s
+  [vla       ] step= 1800 loss=0.0159 acc=1.000 best=1.000 600s
+  [vla       ] step= 2100 loss=0.0109 acc=1.000 best=1.000 702s
+  [vla       ] step= 2400 loss=0.0088 acc=1.000 best=1.000 803s
+  [vla       ] step= 2700 loss=0.0080 acc=1.000 best=1.000 905s
+  [vla       ] step= 3000 loss=0.0077 acc=1.000 best=1.000 1006s
+  vla         train_best=1.000  eval=1.000
+
+--- n_pairs=24  seq_len=73 ---
+  [softmax   ] step=    1 loss=4.8789 acc=0.008 best=0.008 0s
+  [softmax   ] step=  300 loss=4.5225 acc=0.049 best=0.049 20s
+  [softmax   ] step=  600 loss=4.2616 acc=0.055 best=0.055 39s
+  [softmax   ] step=  900 loss=4.1102 acc=0.080 best=0.080 58s
+  [softmax   ] step= 1200 loss=4.0651 acc=0.081 best=0.081 77s
+  [softmax   ] step= 1500 loss=4.0725 acc=0.064 best=0.081 96s
+  [softmax   ] step= 1800 loss=3.9994 acc=0.084 best=0.084 116s
+  [softmax   ] step= 2100 loss=4.0120 acc=0.072 best=0.084 135s
+  [softmax   ] step= 2400 loss=3.9754 acc=0.083 best=0.084 155s
+  [softmax   ] step= 2700 loss=3.9562 acc=0.081 best=0.084 174s
+  [softmax   ] step= 3000 loss=3.9770 acc=0.067 best=0.084 194s
+  softmax     train_best=0.084  eval=0.074
+  [linear    ] step=    1 loss=4.8789 acc=0.008 best=0.008 0s
+  [linear    ] step=  300 loss=4.5131 acc=0.052 best=0.052 55s
+  [linear    ] step=  600 loss=4.2490 acc=0.056 best=0.056 110s
+  [linear    ] step=  900 loss=4.0950 acc=0.079 best=0.079 166s
+  [linear    ] step= 1200 loss=4.0639 acc=0.076 best=0.079 223s
+  [linear    ] step= 1500 loss=4.0822 acc=0.066 best=0.079 281s
+  [linear    ] step= 1800 loss=4.0135 acc=0.081 best=0.081 338s
+  [linear    ] step= 2100 loss=4.0376 acc=0.074 best=0.081 395s
+  [linear    ] step= 2400 loss=4.0153 acc=0.088 best=0.088 451s
+  [linear    ] step= 2700 loss=3.9900 acc=0.072 best=0.088 507s
+  [linear    ] step= 3000 loss=4.0046 acc=0.065 best=0.088 563s
+  linear      train_best=0.088  eval=0.075
+  [deltanet  ] step=    1 loss=4.8792 acc=0.007 best=0.007 0s
+  [deltanet  ] step=  300 loss=4.8524 acc=0.005 best=0.007 62s
+  [deltanet  ] step=  600 loss=4.8520 acc=0.007 best=0.007 124s
+  [deltanet  ] step=  900 loss=4.8455 acc=0.003 best=0.007 186s
+  [deltanet  ] step= 1200 loss=4.8481 acc=0.010 best=0.010 248s
+  [deltanet  ] step= 1500 loss=4.8457 acc=0.006 best=0.010 310s
+  [deltanet  ] step= 1800 loss=4.8471 acc=0.007 best=0.010 372s
+  [deltanet  ] step= 2100 loss=4.8471 acc=0.006 best=0.010 434s
+  [deltanet  ] step= 2400 loss=4.8375 acc=0.010 best=0.010 496s
+  [deltanet  ] step= 2700 loss=4.8321 acc=0.005 best=0.010 557s
+  [deltanet  ] step= 3000 loss=4.8366 acc=0.007 best=0.010 616s
+  deltanet    train_best=0.010  eval=0.010
+  [vla       ] step=    1 loss=4.8792 acc=0.010 best=0.010 0s
+  [vla       ] step=  300 loss=4.7807 acc=0.020 best=0.020 147s
+  [vla       ] step=  600 loss=4.2421 acc=0.065 best=0.065 296s
+  [vla       ] step=  900 loss=1.8697 acc=0.875 best=0.875 445s
+  [vla       ] step= 1200 loss=0.3682 acc=0.997 best=0.997 593s
+  [vla       ] step= 1500 loss=0.0754 acc=1.000 best=1.000 741s
+  [vla       ] step= 1800 loss=0.0231 acc=1.000 best=1.000 890s
+  [vla       ] step= 2100 loss=0.0122 acc=1.000 best=1.000 1040s
+  [vla       ] step= 2400 loss=0.0100 acc=1.000 best=1.000 1189s
+  [vla       ] step= 2700 loss=0.0085 acc=1.000 best=1.000 1338s
+  [vla       ] step= 3000 loss=0.0088 acc=1.000 best=1.000 1487s
+  vla         train_best=1.000  eval=1.000
+✅ Experiment 3B done
+
+ 
+============================================================
+EXPERIMENT 3C: MQAR LONG-CONTEXT  (accuracy vs seq_len)
+============================================================
+
+--- seq_len=49  n_pairs=8 ---
+  softmax     acc=0.149
+  linear      acc=0.147
+  deltanet    acc=0.018
+  vla         acc=1.000
+
+--- seq_len=64  n_pairs=8 ---
+  softmax     acc=0.151
+  linear      acc=0.149
+  deltanet    acc=0.019
+  vla         acc=1.000
+
+--- seq_len=128  n_pairs=8 ---
+  softmax     acc=0.151
+  linear      acc=0.155
+  deltanet    acc=0.011
+  vla         acc=1.000
+
+--- seq_len=256  n_pairs=8 ---
+  softmax     acc=0.150
+  linear      acc=0.152
+  deltanet    acc=0.007
+  vla         acc=0.998
+
+--- seq_len=512  n_pairs=8 ---
+  softmax     acc=0.153
+  linear      acc=0.151
+  deltanet    acc=0.006
+  vla         acc=0.982
+✅ Experiment 3C done
+
+
+
+=================================================================
+PAPER CLAIMS SUMMARY
+=================================================================
+  KV state ratio (LA/VLA): 113×
+
+  MQAR eval accuracy at max load:
+    softmax   : 0.074
+    linear    : 0.075
+    deltanet  : 0.010
+    vla       : 1.000
+
+  LaTeX table rows:
+  Model          MQAR hard    S_final      O(T)?
+  softmax        0.074        —            N²
+  linear         0.075        1633.9       T
+  deltanet       0.010        1.2          T
+  vla            1.000        14.5         T
+
+All artifacts saved to: /content/vlav3_fixed_artifacts
+/tmp/ipykernel_55/1565845859.py:6: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  .apply(lambda g: {
+
