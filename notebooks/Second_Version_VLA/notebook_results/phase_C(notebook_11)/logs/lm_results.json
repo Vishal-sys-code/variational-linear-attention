@@ -1,0 +1,22 @@
+{
+  "val_bpc": {
+    "Linear": 2.7933,
+    "DeltaNet": 2.0487,
+    "VLA": 2.2606
+  },
+  "test_bpc": {
+    "Linear": 2.76,
+    "DeltaNet": 2.0387,
+    "VLA": 2.2382
+  },
+  "random_bpc": 8.1447,
+  "vocab": 283,
+  "model_config": {
+    "d_model": 256,
+    "n_heads": 4,
+    "d_h": 64,
+    "n_layers": 3,
+    "steps": 3000,
+    "seq_len": 128
+  }
+}
