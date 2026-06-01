@@ -1,0 +1,47 @@
+{
+  "expA_state_norm_ratio": 105.2,
+  "expA_vla_S_final": 138.6477,
+  "expA_la_S_final": 14580.3809,
+  "expB_streaming": [
+    {
+      "T": 1000,
+      "elapsed_s": 0.98,
+      "tok_per_sec": 1015,
+      "S_norm": 110.9139,
+      "A_norm": 89.5014,
+      "peak_mem_mb": 11.51,
+      "state_kb": 128.0
+    },
+    {
+      "T": 10000,
+      "elapsed_s": 9.65,
+      "tok_per_sec": 1036,
+      "S_norm": 200.2243,
+      "A_norm": 67.7946,
+      "peak_mem_mb": 11.51,
+      "state_kb": 128.0
+    },
+    {
+      "T": 100000,
+      "elapsed_s": 95.88,
+      "tok_per_sec": 1042,
+      "S_norm": 258.8898,
+      "A_norm": 68.7753,
+      "peak_mem_mb": 11.51,
+      "state_kb": 128.0
+    },
+    {
+      "T": 1000000,
+      "elapsed_s": 946.9,
+      "tok_per_sec": 1056,
+      "S_norm": 275.8789,
+      "A_norm": 170.3973,
+      "peak_mem_mb": 11.51,
+      "state_kb": 128.0
+    }
+  ],
+  "state_kb": 128.0,
+  "plots": {
+    "main": "/kaggle/working/nb10_streaming/plots/paper_figure_nb10.pdf"
+  }
+}
