@@ -1,0 +1,19 @@
+{
+  "val_bpc": {
+    "Linear": 2.7932556507128035,
+    "DeltaNet": 2.048672368361462,
+    "VLA": 2.26063529292413
+  },
+  "test_bpc": {
+    "Linear": 2.760006474131698,
+    "DeltaNet": 2.038685868972076,
+    "VLA": 2.238193455674999
+  },
+  "state_norm_T1000": {
+    "Linear": 1956.72,
+    "DeltaNet": 1.78,
+    "VLA": 39.2
+  },
+  "random_bpc": 8.1447,
+  "claim_holds": false
+}
