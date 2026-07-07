@@ -1,6 +1,7 @@
 from src.models.attention.fast_vla import HAS_TRITON, VLAParallel, VLASequential, VLATriton
 from src.models.attention.vla import VLALayer
 from src.models.attention.vla_v3 import VLAv3
+from src.models.attention.gated_vla import GatedVLAv3
 
 __all__ = [
     "HAS_TRITON",
@@ -9,4 +10,6 @@ __all__ = [
     "VLATriton",
     "VLALayer",
     "VLAv3",
+    "GatedVLAv3",
 ]
+
