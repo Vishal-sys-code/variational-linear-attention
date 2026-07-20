@@ -96,6 +96,18 @@ python scripts/generate_plots.py --all
 
 ---
 
+## 5. Re-generating VLA v3 Benchmarks
+
+To reproduce the latest MQAR and linear scaling benchmark figures, refer directly to the fixed notebook workflow:
+
+```bash
+# Launch Jupyter and execute notebook 07
+jupyter notebook notebooks/07-vlav3-benchmark-fixed.ipynb
+```
+The figures will be saved in `notebooks/vlav3_benchmarks/` and logged.
+
+---
+
 ## Utilizing VLA in Your Project
 
 If you wish to drop VLA into an existing PyTorch codebase, simply import `VLALayer` and replace your standard attention blocks.

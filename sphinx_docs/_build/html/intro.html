@@ -1,18 +1,19 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head><meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Math Primitives" href="maths.html"><link rel="prev" title="Variational Linear Attention documentation" href="index.html">
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Mathematical Primitives" href="maths.html" /><link rel="prev" title="Variational Linear Attention documentation" href="index.html" />
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
         <title>Variational Linear Attention (VLA) - Variational Linear Attention 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
-
-
+    <link rel="stylesheet" type="text/css" href="_static/runaway_theme.css?v=282a5c38" />
+    
+    
 
 
 <style>
@@ -21,33 +22,33 @@
   --color-code-foreground: #1e1e1e;
   --color-brand-primary: #4A90E2;
   --color-brand-content: #4A90E2;
-
+  
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --color-brand-primary: #50E3C2;
   --color-brand-content: #50E3C2;
-
+  
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --color-brand-primary: #50E3C2;
   --color-brand-content: #50E3C2;
-
+  
       }
     }
   }
 </style></head>
   <body>
-
+    
     <script>
       document.body.dataset.theme = localStorage.getItem("theme") || "auto";
     </script>
-
+    
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="svg-toc" viewBox="0 0 24 24">
@@ -151,10 +152,14 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
-<label class="overlay sidebar-overlay" for="__navigation"></label>
-<label class="overlay toc-overlay" for="__toc"></label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -164,7 +169,8 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
       </label>
     </div>
     <div class="header-center">
@@ -172,7 +178,8 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,17 +187,18 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
     </div>
   </header>
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
-
+      
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
-
+  
   <span class="sidebar-brand-text">Variational Linear Attention 1.0 documentation</span>
-
+  
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
@@ -200,10 +208,10 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Variational Linear Attention (VLA)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="maths.html">Math Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maths.html">Mathematical Primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="penalty_builder.html">Penalty Builder Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/vla_core.html">Variational Linear Attention Core</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Experiments &amp; Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Empirical Evaluation &amp; Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running.html">Getting Started &amp; Reproducibility</a></li>
 </ul>
 
@@ -211,7 +219,7 @@
 </div>
 
       </div>
-
+      
     </div>
   </aside>
   <div class="main">
@@ -231,7 +239,8 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -239,54 +248,55 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="variational-linear-attention-vla">
 <h1>Variational Linear Attention (VLA)<a class="headerlink" href="#variational-linear-attention-vla" title="Link to this heading">¶</a></h1>
-<p>Welcome to the official research documentation for <strong>Variational Linear Attention (VLA)</strong> by DeepBrain Labs. This project introduces a novel approach to attention mechanisms, aiming to bridge the gap between the expressive power of Softmax Attention and the efficiency of Linear Attention.</p>
-<section id="the-problem">
-<h2>The Problem<a class="headerlink" href="#the-problem" title="Link to this heading">¶</a></h2>
-<p>Standard Transformers rely on Softmax Attention, which scales quadratically with sequence length (<span class="math notranslate nohighlight">\(\mathcal{O}(T^2)\)</span>). This makes them prohibitively expensive for long-context applications.</p>
-<p>Linear Attention models, on the other hand, approximate the attention mechanism to achieve linear complexity (<span class="math notranslate nohighlight">\(\mathcal{O}(T)\)</span>). However, they often suffer from “attention dilution” and struggle with long-term memory recall tasks, such as the Associative Recall or Delayed Copy tasks. They typically fail to dynamically prioritize relevant information over time.</p>
+<p>Welcome to the official research documentation for <strong>Variational Linear Attention (VLA)</strong>, a next-generation sequence modeling architecture developed by DeepBrain Labs. This work introduces a fundamental paradigm shift in attention mechanisms, rigorously designed to bridge the chasm between the expressive capacity of unbounded Softmax Attention and the theoretical <span class="math notranslate nohighlight">\(\mathcal{O}(N)\)</span> efficiency of Linear Attention variants.</p>
+<section id="the-bottleneck-in-sequence-modeling">
+<h2>The Bottleneck in Sequence Modeling<a class="headerlink" href="#the-bottleneck-in-sequence-modeling" title="Link to this heading">¶</a></h2>
+<p>Standard Transformer architectures fundamentally rely on Softmax Attention, which scales quadratically with respect to sequence length (<span class="math notranslate nohighlight">\(\mathcal{O}(T^2)\)</span>). This constraint imposes severe computational and memory bounds, rendering them prohibitively expensive for frontier-scale long-context applications.</p>
+<p>While subsequent Linear Attention models mathematically approximate the kernel to achieve asymptotic linear complexity (<span class="math notranslate nohighlight">\(\mathcal{O}(T)\)</span>), they universally suffer from <strong>attention dilution</strong> and catastrophic forgetting. In practice, they severely underperform on targeted long-term memory recall tasks, such as high-density Associative Recall or Delayed Copy tasks, as they lack the structural inductive bias to dynamically prioritize or selectively forget information over extended temporal horizons.</p>
 </section>
-<section id="our-solution-vla">
-<h2>Our Solution: VLA<a class="headerlink" href="#our-solution-vla" title="Link to this heading">¶</a></h2>
-<p><strong>Variational Linear Attention (VLA)</strong> reformulates the linear attention mechanism through the lens of a <strong>probabilistic graphical model</strong>. By introducing a time-varying, data-dependent penalty term, VLA allows the model to actively modulate its memory.</p>
-<section id="key-innovations">
-<h3>Key Innovations<a class="headerlink" href="#key-innovations" title="Link to this heading">¶</a></h3>
+<section id="the-vla-formulation">
+<h2>The VLA Formulation<a class="headerlink" href="#the-vla-formulation" title="Link to this heading">¶</a></h2>
+<p><strong>Variational Linear Attention (VLA)</strong> reformulates the linear attention mechanism entirely through the lens of a <strong>probabilistic graphical model</strong>. By introducing a mathematically optimal, time-varying, data-dependent penalty tensor (<span class="math notranslate nohighlight">\(M_t\)</span>), VLA endows the recurrent mechanism with the ability to dynamically modulate its memory state—enabling targeted retention and absolute forgetting natively.</p>
+<section id="key-theoretical-innovations">
+<h3>Key Theoretical Innovations<a class="headerlink" href="#key-theoretical-innovations" title="Link to this heading">¶</a></h3>
 <ol class="arabic simple">
-<li><p><strong>Dynamic Penalty Matrix (<span class="math notranslate nohighlight">\(M_t\)</span>)</strong>: Unlike standard linear attention which treats all past tokens equally (or uses fixed decay), VLA learns to construct a penalty matrix based on the current context. This allows it to forget irrelevant information and strongly remember crucial tokens.</p></li>
-<li><p><strong>Sherman-Morrison Updates</strong>: We utilize the Sherman-Morrison rank-1 update formula to efficiently compute the inverse of the penalty matrix (<span class="math notranslate nohighlight">\(M_t^{-1}\)</span>) at each timestep in <span class="math notranslate nohighlight">\(\mathcal{O}(d^2)\)</span> time, maintaining the overall linear complexity <span class="math notranslate nohighlight">\(\mathcal{O}(T d^2)\)</span>.</p></li>
-<li><p><strong>Optimal Coefficient Recovery</strong>: VLA solves an online optimization problem at every step to find the optimal memory update coefficients, ensuring the memory matrix is updated in a theoretically grounded manner.</p></li>
+<li><p><strong>Dynamic Penalty Matrix (<span class="math notranslate nohighlight">\(M_t\)</span>)</strong>: Standard exponential decay sequences force a rigid, untargeted forgetting curve. VLA, conversely, constructs a dynamic, dense penalty matrix over time, actively suppressing irrelevant information based on strictly local and shifting contextual dynamics.</p></li>
+<li><p><strong>Stable Sherman-Morrison Inversion</strong>: We leverage the rank-1 <strong>Sherman-Morrison Update</strong> to exactingly track the inverse of the penalty matrix (<span class="math notranslate nohighlight">\(A_t = M_t^{-1}\)</span>) at every temporal step. This guarantees strictly linear time <span class="math notranslate nohighlight">\(\mathcal{O}(T d^2)\)</span> state updates while structurally dodging the exploding eigenvalues that plague baseline state-space models and linear transformers.</p></li>
+<li><p><strong>Optimal Coefficient Recovery (<span class="math notranslate nohighlight">\(\alpha^*\)</span>)</strong>: VLA analytically solves an online optimization problem at every forward pass step, mathematically guaranteeing the coefficient scaling vector <span class="math notranslate nohighlight">\(\alpha_t = A_t s_t\)</span> flawlessly minimizes state reconstruction errors.</p></li>
 </ol>
 </section>
 </section>
-<section id="structure-of-this-documentation">
-<h2>Structure of this Documentation<a class="headerlink" href="#structure-of-this-documentation" title="Link to this heading">¶</a></h2>
-<p>This documentation is designed to serve as both a rigorous mathematical reference and a practical API guide:</p>
+<section id="documentation-architecture">
+<h2>Documentation Architecture<a class="headerlink" href="#documentation-architecture" title="Link to this heading">¶</a></h2>
+<p>This repository serves as both a rigorous theoretical reference and a practical engineering implementation guide for reproducing our experimental suites:</p>
 <ul class="simple">
-<li><p><strong><a class="reference internal" href="maths.html"><span class="std std-doc">Theory &amp; Mathematics</span></a></strong>: Deep dive into the core mathematical primitives, including the Sherman-Morrison updates and optimal coefficient derivations.</p></li>
-<li><p><strong><a class="reference internal" href="api/vla_core.html"><span class="std std-doc">API Manual</span></a></strong>: Detailed technical specifications for implementing and utilizing VLA Core, DeltaNet, and Linear Transformer baselines.</p></li>
-<li><p><strong><a class="reference internal" href="experiments.html"><span class="std std-doc">Experiments</span></a></strong>: Comprehensive analysis of our synthetic tasks (Copy, Delayed Recall) and Long Range Arena (LRA) benchmarks, demonstrating VLA’s superiority.</p></li>
-<li><p><strong><a class="reference internal" href="running.html"><span class="std std-doc">Getting Started</span></a></strong>: Practical instructions on how to set up the environment, run experiments, and reproduce our plots.</p></li>
+<li><p><strong><a class="reference internal" href="maths.html"><span class="std std-doc">Theory &amp; Mathematics</span></a></strong>: An in-depth mathematical derivation of the core primitives, including the stable Sherman-Morrison inversions, epsilon-bounded stability mechanisms, and optimal coefficient formulations.</p></li>
+<li><p><strong><a class="reference internal" href="api/vla_core.html"><span class="std std-doc">API Manual</span></a></strong>: Detailed technical specifications for utilizing the PyTorch bindings of VLA Core, alongside DeltaNet and Linear Transformer baselines.</p></li>
+<li><p><strong><a class="reference internal" href="experiments.html"><span class="std std-doc">Experiments &amp; Benchmarks</span></a></strong>: Comprehensive empirical analyses spanning symbolic tasks, Long Range Arena (LRA) throughput, and our latest <strong>VLA v3</strong> Multi-Query Associative Recall (MQAR) tests validating state-of-the-art long-context retention.</p></li>
+<li><p><strong><a class="reference internal" href="running.html"><span class="std std-doc">Getting Started</span></a></strong>: Practical directives for environment orchestration, experiment replication, and plotting pipeline execution.</p></li>
 </ul>
-<p>Explore the sections via the sidebar to understand how Variational Linear Attention redefines efficient sequence modeling.</p>
+<p>Navigate via the sidebar to explore how Variational Linear Attention effectively circumvents the long-context bottleneck, delivering pristine memory retention at massive scales.</p>
 </section>
 </section>
 
         </article>
       </div>
       <footer>
-
+        
         <div class="related-pages">
           <a class="next-page" href="maths.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Math Primitives</div>
+                <div class="title">Mathematical Primitives</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -296,9 +306,9 @@
                 <div class="context">
                   <span>Previous</span>
                 </div>
-
+                
                 <div class="title">Home</div>
-
+                
               </div>
             </a>
         </div>
@@ -308,20 +318,20 @@
                 Copyright &#169; 2026, DeepBrain Labs
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-
+            
             <a href="https://github.com/pradyunsg/furo">Furo</a>
-
+            
           </div>
           <div class="right-details">
-
+            
           </div>
         </div>
-
+        
       </footer>
     </div>
     <aside class="toc-drawer">
-
-
+      
+      
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
@@ -332,12 +342,12 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Variational Linear Attention (VLA)</a><ul>
-<li><a class="reference internal" href="#the-problem">The Problem</a></li>
-<li><a class="reference internal" href="#our-solution-vla">Our Solution: VLA</a><ul>
-<li><a class="reference internal" href="#key-innovations">Key Innovations</a></li>
+<li><a class="reference internal" href="#the-bottleneck-in-sequence-modeling">The Bottleneck in Sequence Modeling</a></li>
+<li><a class="reference internal" href="#the-vla-formulation">The VLA Formulation</a><ul>
+<li><a class="reference internal" href="#key-theoretical-innovations">Key Theoretical Innovations</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#structure-of-this-documentation">Structure of this Documentation</a></li>
+<li><a class="reference internal" href="#documentation-architecture">Documentation Architecture</a></li>
 </ul>
 </li>
 </ul>
@@ -345,17 +355,17 @@
           </div>
         </div>
       </div>
-
-
+      
+      
     </aside>
   </div>
 </div><script src="_static/documentation_options.js?v=f2a433a1"></script>
-    <script src="_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

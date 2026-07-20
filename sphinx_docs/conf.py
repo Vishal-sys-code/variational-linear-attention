@@ -47,4 +47,9 @@ html_theme_options = {
         "color-brand-primary": "#50E3C2",
         "color-brand-content": "#50E3C2",
     },
+    "default_mode": "dark",
 }
+
+html_css_files = [
+    'runaway_theme.css',
+]

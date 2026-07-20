@@ -1,18 +1,19 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head><meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Experiments &amp; Results" href="experiments.html">
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Empirical Evaluation &amp; Analysis" href="experiments.html" />
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
         <title>Getting Started &amp; Reproducibility - Variational Linear Attention 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
-
-
+    <link rel="stylesheet" type="text/css" href="_static/runaway_theme.css?v=282a5c38" />
+    
+    
 
 
 <style>
@@ -21,33 +22,33 @@
   --color-code-foreground: #1e1e1e;
   --color-brand-primary: #4A90E2;
   --color-brand-content: #4A90E2;
-
+  
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --color-brand-primary: #50E3C2;
   --color-brand-content: #50E3C2;
-
+  
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --color-brand-primary: #50E3C2;
   --color-brand-content: #50E3C2;
-
+  
       }
     }
   }
 </style></head>
   <body>
-
+    
     <script>
       document.body.dataset.theme = localStorage.getItem("theme") || "auto";
     </script>
-
+    
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="svg-toc" viewBox="0 0 24 24">
@@ -151,10 +152,14 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
-<label class="overlay sidebar-overlay" for="__navigation"></label>
-<label class="overlay toc-overlay" for="__toc"></label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -164,7 +169,8 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
       </label>
     </div>
     <div class="header-center">
@@ -172,7 +178,8 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,17 +187,18 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
     </div>
   </header>
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
-
+      
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
-
+  
   <span class="sidebar-brand-text">Variational Linear Attention 1.0 documentation</span>
-
+  
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
@@ -200,10 +208,10 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Variational Linear Attention (VLA)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="maths.html">Math Primitives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maths.html">Mathematical Primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="penalty_builder.html">Penalty Builder Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/vla_core.html">Variational Linear Attention Core</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Experiments &amp; Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Empirical Evaluation &amp; Analysis</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Getting Started &amp; Reproducibility</a></li>
 </ul>
 
@@ -211,7 +219,7 @@
 </div>
 
       </div>
-
+      
     </div>
   </aside>
   <div class="main">
@@ -231,7 +239,8 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -239,7 +248,8 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -327,6 +337,16 @@ python<span class="w"> </span>scripts/generate_plots.py<span class="w"> </span>-
 </div>
 </section>
 <hr class="docutils" />
+<section id="re-generating-vla-v3-benchmarks">
+<h2>5. Re-generating VLA v3 Benchmarks<a class="headerlink" href="#re-generating-vla-v3-benchmarks" title="Link to this heading">¶</a></h2>
+<p>To reproduce the latest MQAR and linear scaling benchmark figures, refer directly to the fixed notebook workflow:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Launch Jupyter and execute notebook 07</span>
+jupyter<span class="w"> </span>notebook<span class="w"> </span>notebooks/07-vlav3-benchmark-fixed.ipynb
+</pre></div>
+</div>
+<p>The figures will be saved in <code class="docutils literal notranslate"><span class="pre">notebooks/vlav3_benchmarks/</span></code> and logged.</p>
+</section>
+<hr class="docutils" />
 <section id="utilizing-vla-in-your-project">
 <h2>Utilizing VLA in Your Project<a class="headerlink" href="#utilizing-vla-in-your-project" title="Link to this heading">¶</a></h2>
 <p>If you wish to drop VLA into an existing PyTorch codebase, simply import <code class="docutils literal notranslate"><span class="pre">VLALayer</span></code> and replace your standard attention blocks.</p>
@@ -352,18 +372,18 @@ python<span class="w"> </span>scripts/generate_plots.py<span class="w"> </span>-
         </article>
       </div>
       <footer>
-
+        
         <div class="related-pages">
-
+          
           <a class="prev-page" href="experiments.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
-
-                <div class="title">Experiments &amp; Results</div>
-
+                
+                <div class="title">Empirical Evaluation &amp; Analysis</div>
+                
               </div>
             </a>
         </div>
@@ -373,20 +393,20 @@ python<span class="w"> </span>scripts/generate_plots.py<span class="w"> </span>-
                 Copyright &#169; 2026, DeepBrain Labs
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-
+            
             <a href="https://github.com/pradyunsg/furo">Furo</a>
-
+            
           </div>
           <div class="right-details">
-
+            
           </div>
         </div>
-
+        
       </footer>
     </div>
     <aside class="toc-drawer">
-
-
+      
+      
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
@@ -409,6 +429,7 @@ python<span class="w"> </span>scripts/generate_plots.py<span class="w"> </span>-
 </li>
 <li><a class="reference internal" href="#running-lra-benchmarks">3. Running LRA Benchmarks</a></li>
 <li><a class="reference internal" href="#re-generating-paper-plots">4. Re-generating Paper Plots</a></li>
+<li><a class="reference internal" href="#re-generating-vla-v3-benchmarks">5. Re-generating VLA v3 Benchmarks</a></li>
 <li><a class="reference internal" href="#utilizing-vla-in-your-project">Utilizing VLA in Your Project</a></li>
 </ul>
 </li>
@@ -417,17 +438,17 @@ python<span class="w"> </span>scripts/generate_plots.py<span class="w"> </span>-
           </div>
         </div>
       </div>
-
-
+      
+      
     </aside>
   </div>
 </div><script src="_static/documentation_options.js?v=f2a433a1"></script>
-    <script src="_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
