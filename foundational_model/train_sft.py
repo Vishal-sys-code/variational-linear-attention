@@ -66,7 +66,7 @@ def train_sft():
         scaler.step(optimizer)
         scaler.update()
         
-        if step % 10 == 0:
+        if step % 1 == 0:
             print(f"SFT Step {step} | Loss: {loss.item() * gradient_accumulation_steps:.4f}")
 
     print("SFT complete! Saving checkpoint...")

@@ -115,7 +115,7 @@ def train_rlhf_ppo():
             torch.nn.utils.clip_grad_norm_(value_model.parameters(), 1.0)
             opt_value.step()
             
-        if step % 10 == 0:
+        if step % 1 == 0:
             print(f"PPO Step {step} | Policy Loss: {pg_loss.item():.4f} | Value Loss: {v_loss.item():.4f} | Avg Reward: {rewards.mean().item():.4f}")
 
     print("RLHF PPO complete! Saving final aligned model...")

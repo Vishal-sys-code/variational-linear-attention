@@ -137,7 +137,7 @@ def train_reward_model():
         torch.nn.utils.clip_grad_norm_(reward_model.parameters(), 1.0)
         optimizer.step()
         
-        if step % 10 == 0:
+        if step % 1 == 0:
             acc = total_acc / gradient_accumulation_steps
             print(f"RM Step {step} | Loss: {total_loss:.4f} | RM Accuracy: {acc*100:.1f}%")
 

@@ -56,12 +56,17 @@ def train_pt():
             optimizer.zero_grad()
             
             step_count += 1
-            if step_count % 10 == 0:
-                print(f"PT Step {step_count} | Running Loss: {total_loss / 10:.4f}")
-                total_loss = 0.0
+            print(f"PT Step {step_count} | Running Loss: {total_loss:.4f}")
+            total_loss = 0.0
                 
-        # Break after some steps for Kaggle prototyping
-        if step_count >= 5000:
+            # Intermediate saving every 100 steps
+            if step_count % 100 == 0:
+                os.makedirs("checkpoints", exist_ok=True)
+                torch.save(model.state_dict(), f"checkpoints/vla_pt_12M_step_{step_count}.pth")
+                print(f"Saved intermediate checkpoint at step {step_count}!")
+                
+        # Break after 1000 steps for Kaggle prototyping (approx 4-6 hours)
+        if step_count >= 1000:
             break
             
     print("Pre-Training complete! Saving checkpoint...")
