@@ -66,11 +66,11 @@ def train_rlhf_ppo():
     print("Starting PPO Loop...")
     for step in range(50):
         # 1. Sample a prompt
-        prompts = torch.randint(0, 32000, (4, 32)).to(device)
+        prompts = torch.randint(0, 32000, (1, 32)).to(device)
         
         # 2. Generate responses from Policy Model
         # (In production, use policy_model.generate)
-        completions = torch.randint(0, 32000, (4, 64)).to(device)
+        completions = torch.randint(0, 32000, (1, 32)).to(device)
         full_seqs = torch.cat([prompts, completions], dim=1)
         
         # 3. Calculate Rewards using the frozen Reward Model

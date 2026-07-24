@@ -40,24 +40,34 @@ def train_sft():
         print("Warning: No PT checkpoint found, starting from scratch for SFT.")
         
     # Learning rate is much lower in SFT
-    optimizer = optim.AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
+    optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
+    scaler = torch.amp.GradScaler('cuda')
+    
+    batch_size = 1
+    gradient_accumulation_steps = 16
     
     model.train()
     print("Starting SFT Loop...")
     
     for step in range(100):
-        x, y = create_sft_batch()
-        x, y = x.to(device), y.to(device)
-        
-        logits, loss = model(x, y)
-        
         optimizer.zero_grad()
-        loss.backward()
+        for micro_step in range(gradient_accumulation_steps):
+            x, y = create_sft_batch(batch_size=batch_size, seq_len=256)
+            x, y = x.to(device), y.to(device)
+            
+            with torch.amp.autocast('cuda'):
+                logits, loss = model(x, y)
+                loss = loss / gradient_accumulation_steps
+            
+            scaler.scale(loss).backward()
+        
+        scaler.unscale_(optimizer)
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-        optimizer.step()
+        scaler.step(optimizer)
+        scaler.update()
         
         if step % 10 == 0:
-            print(f"SFT Step {step} | Loss: {loss.item():.4f}")
+            print(f"SFT Step {step} | Loss: {loss.item() * gradient_accumulation_steps:.4f}")
 
     print("SFT complete! Saving checkpoint...")
     os.makedirs("checkpoints", exist_ok=True)

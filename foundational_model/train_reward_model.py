@@ -72,7 +72,7 @@ class VLARewardModel(nn.Module):
         final_scores = scores[:, -1]
         return final_scores, scores
 
-def create_preference_batch(batch_size=4, seq_len=128):
+def create_preference_batch(batch_size=2, seq_len=128):
     """
     Mock data generation for Reward Modeling.
     In production, use Anthropic/hh-rlhf or a reasoning preference dataset.
@@ -106,30 +106,40 @@ def train_reward_model():
 
     optimizer = optim.AdamW(reward_model.parameters(), lr=1e-5)
     
+    batch_size = 1
+    gradient_accumulation_steps = 4
+    
     reward_model.train()
     print("Starting Reward Model Training Loop...")
     
     for step in range(50):
-        chosen, rejected = create_preference_batch()
-        chosen, rejected = chosen.to(device), rejected.to(device)
-        
-        # Forward pass for both chosen and rejected sequences
-        chosen_rewards, _ = reward_model(chosen)     # (B,)
-        rejected_rewards, _ = reward_model(rejected) # (B,)
-        
-        # Reward Loss: Bradley-Terry ranking loss
-        # We want chosen_rewards to be significantly higher than rejected_rewards
-        # loss = -log(sigmoid(reward_chosen - reward_rejected))
-        loss = -F.logsigmoid(chosen_rewards - rejected_rewards).mean()
-        
         optimizer.zero_grad()
-        loss.backward()
+        
+        # Accumulate gradients
+        total_loss = 0
+        total_acc = 0
+        for micro_step in range(gradient_accumulation_steps):
+            chosen, rejected = create_preference_batch(batch_size=batch_size, seq_len=128)
+            chosen, rejected = chosen.to(device), rejected.to(device)
+            
+            with torch.amp.autocast('cuda'):
+                chosen_rewards, _ = reward_model(chosen)     # (B,)
+                rejected_rewards, _ = reward_model(rejected) # (B,)
+                
+                loss = -F.logsigmoid(chosen_rewards - rejected_rewards).mean()
+                loss = loss / gradient_accumulation_steps
+            
+            loss.backward()
+            
+            total_loss += loss.item() * gradient_accumulation_steps
+            total_acc += (chosen_rewards > rejected_rewards).float().mean().item()
+            
         torch.nn.utils.clip_grad_norm_(reward_model.parameters(), 1.0)
         optimizer.step()
         
         if step % 10 == 0:
-            acc = (chosen_rewards > rejected_rewards).float().mean().item()
-            print(f"RM Step {step} | Loss: {loss.item():.4f} | RM Accuracy: {acc*100:.1f}%")
+            acc = total_acc / gradient_accumulation_steps
+            print(f"RM Step {step} | Loss: {total_loss:.4f} | RM Accuracy: {acc*100:.1f}%")
 
     print("Reward Model training complete! Saving checkpoint...")
     os.makedirs("checkpoints", exist_ok=True)

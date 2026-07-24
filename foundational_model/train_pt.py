@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from foundational_model.config import VLAConfig
 from foundational_model.vla_llm import VLACausalLM
 from foundational_model.dataset import get_mixed_dataloader
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import autocast
 
 def train_pt():
     """
@@ -22,9 +22,9 @@ def train_pt():
     optimizer = optim.AdamW(model.parameters(), lr=6e-4, weight_decay=0.1, betas=(0.9, 0.95))
     scaler = torch.amp.GradScaler('cuda') # For mixed precision
     
-    batch_size = 16
+    batch_size = 4 # Reduced to prevent Kaggle T4 OOM
     seq_len = 256
-    gradient_accumulation_steps = 4 # Simulate batch_size = 64
+    gradient_accumulation_steps = 16 # Simulate batch_size = 64
     
     dataloader = get_mixed_dataloader(batch_size, seq_len)
     
@@ -38,7 +38,7 @@ def train_pt():
         x, y = x.to(device), y.to(device)
         
         # Mixed precision forward pass
-        with autocast():
+        with autocast('cuda'):
             logits, loss = model(x, y)
             loss = loss / gradient_accumulation_steps
             
