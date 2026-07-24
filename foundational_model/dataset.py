@@ -18,8 +18,8 @@ class MixedFoundationalDataset(IterableDataset):
         # Load streaming datasets to avoid massive memory overhead on Kaggle
         print("Loading datasets for mixing...")
         ds_en = load_dataset("HuggingFaceFW/fineweb-edu", name="sample-10BT", split="train", streaming=True)
-        ds_code = load_dataset("codeparrot/github-code", streaming=True, split="train") # Example code dataset
-        ds_hi = load_dataset("wikimedia/wikipedia", "20231101.hi", split="train", streaming=True)
+        ds_code = load_dataset("codeparrot/github-code", streaming=True, split="train", trust_remote_code=True) # Example code dataset
+        ds_hi = load_dataset("wikimedia/wikipedia", "20231101.hi", split="train", streaming=True, trust_remote_code=True)
         
         # We need to map all datasets to yield a 'text' column
         def extract_text_en(x): return {"text": x["text"]}
