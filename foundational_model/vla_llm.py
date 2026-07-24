@@ -62,7 +62,7 @@ class VLACausalLM(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
-    def forward(self, idx: torch.Tensor, targets: torch.Tensor = None):
+    def forward(self, idx: torch.Tensor, targets: torch.Tensor = None, use_cache: bool = False, start_pos: int = 0):
         """
         Args:
             idx: (B, T) tensor of integer token indices
@@ -73,7 +73,7 @@ class VLACausalLM(nn.Module):
         
         # Forward embeddings
         tok_emb = self.token_embedding(idx) # (B, T, d_model)
-        pos = torch.arange(0, T, dtype=torch.long, device=device).unsqueeze(0)
+        pos = torch.arange(start_pos, start_pos + T, dtype=torch.long, device=device).unsqueeze(0)
         pos_emb = self.position_embedding(pos) # (1, T, d_model)
         
         x = self.dropout(tok_emb + pos_emb)
@@ -81,7 +81,7 @@ class VLACausalLM(nn.Module):
         # VLA explicitly handles causality through its recurrence (since it computes state sequentially)
         # Note: In a causal setting, the current standard VLALayer implementation evaluates states causally.
         for layer in self.layers:
-            x = layer(x)
+            x = layer(x, use_cache=use_cache)
             
         x = self.ln_f(x)
         logits = self.lm_head(x) # (B, T, vocab_size)
@@ -96,23 +96,39 @@ class VLACausalLM(nn.Module):
     @torch.no_grad()
     def generate(self, idx: torch.Tensor, max_new_tokens: int, temperature: float = 1.0, top_k: int = None):
         """
-        Take a conditioning sequence of indices idx (LongTensor of shape (B,T)) and complete
-        the sequence max_new_tokens times, feeding the predictions back into the model each time.
+        Fast O(1) State-Cached Generation.
+        1. Pass the initial prompt to build the recurrent state matrix.
+        2. Enter a fast loop that only evaluates the *single newest token* using use_cache=True.
         """
-        for _ in range(max_new_tokens):
-            # Crop to max_len if needed
-            idx_cond = idx if idx.size(1) <= self.config.max_len else idx[:, -self.config.max_len:]
+        # Crop prompt if needed
+        idx_cond = idx if idx.size(1) <= self.config.max_len else idx[:, -self.config.max_len:]
+        
+        # 1. Prefill Phase: Pass the entire prompt to build up the RNN state
+        logits, _ = self(idx_cond, use_cache=False)
+        
+        # Pluck the final step logits to sample the first new token
+        next_logits = logits[:, -1, :] / temperature
+        if top_k is not None:
+            v, _ = torch.topk(next_logits, min(top_k, next_logits.size(-1)))
+            next_logits[next_logits < v[:, [-1]]] = -float('Inf')
             
-            logits, _ = self(idx_cond)
-            # Pluck the logits at the final step and scale by desired temperature
-            logits = logits[:, -1, :] / temperature
+        probs = F.softmax(next_logits, dim=-1)
+        idx_next = torch.multinomial(probs, num_samples=1)
+        idx = torch.cat((idx, idx_next), dim=1)
+        
+        # 2. Decode Phase: Lightning fast O(1) generation
+        current_pos = idx_cond.size(1)
+        for _ in range(max_new_tokens - 1):
+            # Pass ONLY the single newest token and tell the model to use the cached recurrent state
+            logits, _ = self(idx_next, use_cache=True, start_pos=current_pos)
+            current_pos += 1
             
-            # Optionally crop the logits to only the top k options
+            next_logits = logits[:, -1, :] / temperature
             if top_k is not None:
-                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-                logits[logits < v[:, [-1]]] = -float('Inf')
+                v, _ = torch.topk(next_logits, min(top_k, next_logits.size(-1)))
+                next_logits[next_logits < v[:, [-1]]] = -float('Inf')
                 
-            probs = F.softmax(logits, dim=-1)
+            probs = F.softmax(next_logits, dim=-1)
             idx_next = torch.multinomial(probs, num_samples=1)
             
             idx = torch.cat((idx, idx_next), dim=1)

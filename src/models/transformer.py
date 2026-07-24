@@ -59,7 +59,7 @@ class LRATransformerBlock(nn.Module):
             nn.Dropout(dropout)
         )
         
-    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None, use_cache: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         # Pre-LN Architecture
         # 1. Attention Path
         residual = x
@@ -70,12 +70,12 @@ class LRATransformerBlock(nn.Module):
         
         if return_states:
             if is_vla:
-                attn_out, states = self.attn(x_norm, return_states=True, symbolic_adj=symbolic_adj)
+                attn_out, states = self.attn(x_norm, return_states=True, symbolic_adj=symbolic_adj, use_cache=use_cache)
             else:
                 attn_out, states = self.attn(x_norm, return_states=True)
         else:
             if is_vla:
-                attn_out = self.attn(x_norm, symbolic_adj=symbolic_adj)
+                attn_out = self.attn(x_norm, symbolic_adj=symbolic_adj, use_cache=use_cache)
             else:
                 attn_out = self.attn(x_norm)
             states = None
@@ -142,7 +142,7 @@ class LRAModel(nn.Module):
         # If the task requires a single classification output out of the whole sequence:
         self.cls_head = nn.Linear(d_model, num_classes) # default was 2
         
-    def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, pool: bool = True, symbolic_adj: Optional[torch.Tensor] = None, use_cache: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Args:
             x: Input token indices (B, T)
@@ -164,9 +164,9 @@ class LRAModel(nn.Module):
         states = None
         for i, layer in enumerate(self.layers):
             if return_states and i == len(self.layers) - 1:
-                x, states = layer(x, return_states=True, symbolic_adj=symbolic_adj)
+                x, states = layer(x, return_states=True, symbolic_adj=symbolic_adj, use_cache=use_cache)
             else:
-                x = layer(x, symbolic_adj=symbolic_adj)
+                x = layer(x, symbolic_adj=symbolic_adj, use_cache=use_cache)
             
         x = self.ln_f(x)
         

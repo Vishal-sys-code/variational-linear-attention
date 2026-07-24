@@ -70,7 +70,7 @@ class VLALayer(nn.Module):
             gamma=gamma
         )
 
-    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None) -> torch.Tensor | Tuple[torch.Tensor, dict]:
+    def forward(self, x: torch.Tensor, return_states: bool = False, symbolic_adj: Optional[torch.Tensor] = None, use_cache: bool = False) -> torch.Tensor | Tuple[torch.Tensor, dict]:
         """
         Forward pass for VLA layer.
         
@@ -86,16 +86,17 @@ class VLALayer(nn.Module):
         device = x.device
         dtype = x.dtype
 
-        # Initialize state
-        # A_0 = (1/lambda_0) * I
-        self.inverse_tracker.init(batch_size=B, device=device, dtype=torch.float32)
-        # S_0 = 0
-        self.memory_manager.reset(batch_size=B, device=device, dtype=torch.float32)
-        
-        # Init symbolic tracker
-        self.symbolic_tracker.init_sequence(
-            A_rel=symbolic_adj, batch_size=B, max_seq_len=T, device=device, dtype=torch.float32
-        )
+        # Initialize state if not using cache
+        if not use_cache:
+            # A_0 = (1/lambda_0) * I
+            self.inverse_tracker.init(batch_size=B, device=device, dtype=torch.float32)
+            # S_0 = 0
+            self.memory_manager.reset(batch_size=B, device=device, dtype=torch.float32)
+            
+            # Init symbolic tracker
+            self.symbolic_tracker.init_sequence(
+                A_rel=symbolic_adj, batch_size=B, max_seq_len=T, device=device, dtype=torch.float32
+            )
 
         outputs = []
         if return_states:
