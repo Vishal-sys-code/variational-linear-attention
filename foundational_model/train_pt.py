@@ -20,7 +20,7 @@ def train_pt():
     model = VLACausalLM(config).to(device)
     
     optimizer = optim.AdamW(model.parameters(), lr=6e-4, weight_decay=0.1, betas=(0.9, 0.95))
-    scaler = GradScaler() # For mixed precision
+    scaler = torch.amp.GradScaler('cuda') # For mixed precision
     
     batch_size = 16
     seq_len = 256
