@@ -56,7 +56,8 @@ def train_pt():
             optimizer.zero_grad()
             
             step_count += 1
-            print(f"PT Step {step_count} | Running Loss: {total_loss:.4f}")
+            avg_loss = total_loss / gradient_accumulation_steps
+            print(f"PT Step {step_count} | Running Loss: {avg_loss:.4f}")
             total_loss = 0.0
                 
             # Intermediate saving every 100 steps
