@@ -18,12 +18,12 @@ class MixedFoundationalDataset(IterableDataset):
         # Load streaming datasets to avoid massive memory overhead on Kaggle
         print("Loading datasets for mixing...")
         ds_en = load_dataset("HuggingFaceFW/fineweb-edu", name="sample-10BT", split="train", streaming=True)
-        ds_code = load_dataset("lucasmccabe-lmi/CodeAlpaca-20k", streaming=True, split="train") # Parquet format code dataset
+        ds_code = load_dataset("iamtarun/python_code_instructions_18k_alpaca", streaming=True, split="train") # Parquet format code dataset
         ds_hi = load_dataset("wikimedia/wikipedia", "20231101.hi", split="train", streaming=True)
         
         # We need to map all datasets to yield a 'text' column
         def extract_text_en(x): return {"text": x["text"]}
-        def extract_text_code(x): return {"text": f"{x.get('instruction', '')}\n{x.get('input', '')}\n{x.get('output', '')}"}
+        def extract_text_code(x): return {"text": x.get("prompt", "")}
         def extract_text_hi(x): return {"text": x["text"]}
         
         ds_en = ds_en.map(extract_text_en, remove_columns=list(ds_en.features))
