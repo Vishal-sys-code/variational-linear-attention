@@ -18,8 +18,11 @@ def train_pt():
     
     print(f"Initializing VLA Pre-Training on {device}...")
     model = VLACausalLM(config).to(device)
+    if device == 'cuda':
+        print("Compiling model for blazing fast training...")
+        model = torch.compile(model)
     
-    optimizer = optim.AdamW(model.parameters(), lr=6e-4, weight_decay=0.1, betas=(0.9, 0.95))
+    optimizer = optim.AdamW(model.parameters(), lr=2e-3, weight_decay=0.1, betas=(0.9, 0.95))
     scaler = torch.amp.GradScaler('cuda') # For mixed precision
     
     batch_size = 4 # Reduced to prevent Kaggle T4 OOM

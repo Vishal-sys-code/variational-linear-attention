@@ -91,6 +91,9 @@ def train_reward_model():
     
     print(f"Initializing VLA Reward Model on {device}...")
     reward_model = VLARewardModel(config).to(device)
+    if device == 'cuda':
+        print("Compiling model for blazing fast training...")
+        reward_model = torch.compile(reward_model)
     
     # Initialize from the SFT model weights (so it understands language & format)
     sft_checkpoint = "checkpoints/vla_sft_12M.pth"
@@ -104,7 +107,7 @@ def train_reward_model():
     else:
         print("Warning: No SFT checkpoint found, starting RM from scratch.")
 
-    optimizer = optim.AdamW(reward_model.parameters(), lr=1e-5)
+    optimizer = optim.AdamW(reward_model.parameters(), lr=5e-5)
     
     batch_size = 1
     gradient_accumulation_steps = 4

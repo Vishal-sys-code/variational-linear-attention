@@ -30,6 +30,9 @@ def train_sft():
     
     print(f"Initializing VLA SFT on {device}...")
     model = VLACausalLM(config).to(device)
+    if device == 'cuda':
+        print("Compiling model for blazing fast training...")
+        model = torch.compile(model)
     
     # In SFT, we load the pre-trained weights
     pt_checkpoint = "checkpoints/vla_pt_12M.pth"
@@ -39,8 +42,8 @@ def train_sft():
     else:
         print("Warning: No PT checkpoint found, starting from scratch for SFT.")
         
-    # Learning rate is much lower in SFT
-    optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
+    # Learning rate is much lower in SFT, but bumped for Kaggle prototype
+    optimizer = optim.AdamW(model.parameters(), lr=2e-4, weight_decay=0.01)
     scaler = torch.amp.GradScaler('cuda')
     
     batch_size = 1

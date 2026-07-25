@@ -44,6 +44,13 @@ def train_rlhf_ppo():
     # 4. Active Value Model (Learnable Baseline to calculate Advantages)
     value_model = VLARewardModel(config).to(device)
     
+    if device == 'cuda':
+        print("Compiling all 4 models for blazing fast RLHF...")
+        policy_model = torch.compile(policy_model)
+        ref_model = torch.compile(ref_model)
+        reward_model = torch.compile(reward_model)
+        value_model = torch.compile(value_model)
+        
     # Load checkpoints (Simulated here. In reality, you load the respective SFT and RM checkpoints)
     sft_ckpt = "checkpoints/vla_sft_12M.pth"
     rm_ckpt = "checkpoints/vla_reward_model_12M.pth"
