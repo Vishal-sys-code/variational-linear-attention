@@ -39,7 +39,6 @@ class VLALayer(nn.Module):
         self.W_v = nn.Linear(d_model, self.d_head)
         
         # Output Projection W_o: (d_head -> d_model)
-        self.out_norm = nn.LayerNorm(self.d_head)
         self.W_o = nn.Linear(self.d_head, self.d_model)
         
         self.enable_stabilization = enable_stabilization
@@ -303,7 +302,6 @@ class VLALayer(nn.Module):
         O = torch.stack(outputs, dim=1).to(dtype=dtype)  # (B, T, d_head)
         
         # Step 6: Output Projection
-        O = self.out_norm(O)
         O = self.W_o(O)  # (B, T, d_model)
         
         if return_states:
