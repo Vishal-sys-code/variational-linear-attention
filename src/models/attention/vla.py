@@ -123,19 +123,26 @@ class VLALayer(nn.Module):
         mem_step = self.memory_manager.step.item()
         fallback_count = self.inverse_tracker.fallback_count.item()
 
+        # Pre-cast and unbind sequence tensors to remove slicing overhead in loop
+        Q_list = Q.to(dtype=torch.float32).unbind(dim=1)
+        K_list = K.to(dtype=torch.float32).unbind(dim=1)
+        V_list = V.to(dtype=torch.float32).unbind(dim=1)
+        Lambda_list = Lambda_seq.to(dtype=torch.float32).unbind(dim=1)
+        U_list = U_seq.to(dtype=torch.float32).unbind(dim=1)
+
         # Iterate over tokens
         for t in range(T):
             # Extract current timestep pre-computed vectors
-            q_t = Q[:, t, :].to(dtype=torch.float32)  # (B, d_head)
-            k_t = K[:, t, :].to(dtype=torch.float32)  # (B, d_head)
-            v_t = V[:, t, :].to(dtype=torch.float32)  # (B, d_head)
+            q_t = Q_list[t]  # (B, d_head)
+            k_t = K_list[t]  # (B, d_head)
+            v_t = V_list[t]  # (B, d_head)
 
             # Step 4.2: Compute score s_t (legacy, unused for routing but kept for diagnostics if needed)
             s_t = (k_t * q_t).sum(dim=-1, keepdim=True)  # (B, 1)
 
             # Step 4.3: Extract pre-computed penalty components
-            lambda_t = Lambda_seq[:, t, :].to(dtype=torch.float32)
-            u_t = U_seq[:, t, :].to(dtype=torch.float32)
+            lambda_t = Lambda_list[t]
+            u_t = U_list[t]
             
             # Step 4.3b: Scale u_t to prevent large rank-1 updates
             import math
