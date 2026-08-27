@@ -84,18 +84,90 @@ class InversePenaltyTracker(nn.Module):
         if self.A_t is None:
             raise RuntimeError("InversePenaltyTracker not initialized. Call init() first.")
             
-        # Handle rank-r by sequential updates
         if u_t.dim() == 3:
             # (B, r, d)
-            r = u_t.size(1)
-            for i in range(r):
-                self._update_single(u_t[:, i, :])
+            self._update_rank_r(u_t)
         elif u_t.dim() == 2:
             # (B, d)
             self._update_single(u_t)
         else:
             raise ValueError(f"u_t must be (B, d) or (B, r, d), got {u_t.shape}")
             
+    def _update_rank_r(self, u_r: torch.Tensor):
+        """
+        Internal Woodbury update for rank-r block.
+        u_r: (B, r, d)
+        """
+        B, r, d = u_r.shape
+        U = u_r.transpose(1, 2)  # (B, d, r)
+
+        # 1. Compute AU = A_{t-1} U
+        AU = torch.bmm(self.A_t, U)  # (B, d, d) @ (B, d, r) -> (B, d, r)
+
+        # 2. Compute C = I_r + U^T AU
+        I_r = torch.eye(r, device=u_r.device, dtype=u_r.dtype).unsqueeze(0).expand(B, -1, -1)
+        UT_AU = torch.bmm(U.transpose(1, 2), AU)  # (B, r, d) @ (B, d, r) -> (B, r, r)
+        C = I_r + UT_AU  # (B, r, r)
+
+        # 3. Solve C X = AU^T for X (where X = C^{-1} AU^T)
+        # Using torch.linalg.solve(C, AU^T)
+        AUT = AU.transpose(1, 2)  # (B, r, d)
+
+        try:
+            # Check determinant for instability (similar to delta < eps in rank-1)
+            # If abs(det(C)) < stabilization_eps, we consider it unstable.
+            det_C = torch.linalg.det(C)
+            mask_unstable = (torch.abs(det_C) < self.stabilization_eps) | ~torch.isfinite(det_C)
+
+            # X shape: (B, r, d)
+            X = torch.linalg.solve(C, AUT)
+
+            # Also check for NaNs/Infs in X just in case
+            mask_unstable = mask_unstable | (~torch.isfinite(X)).reshape(B, -1).any(dim=1)
+
+            if self.enable_stabilization and mask_unstable.any():
+                self.fallback_count += mask_unstable.sum()
+
+                # We need to compute stable updates for stable items in batch
+                # and fallback for unstable ones
+                fallback_add = self.stabilization_eps * torch.eye(d, device=u_r.device, dtype=u_r.dtype).unsqueeze(0).expand(B, -1, -1)
+
+                # Replace unstable items in X with 0 temporarily to avoid NaN propagation
+                safe_X = X.clone()
+                safe_X[mask_unstable] = 0.0
+
+                update_term = torch.bmm(AU, safe_X)  # (B, d, r) @ (B, r, d) -> (B, d, d)
+                A_stable = self.A_t - update_term
+                A_unstable = self.A_t + fallback_add
+
+                mask_expanded = mask_unstable.view(-1, 1, 1).expand_as(self.A_t)
+                self.A_t = torch.where(mask_expanded, A_unstable, A_stable)
+            else:
+                update_term = torch.bmm(AU, X)  # (B, d, r) @ (B, r, d) -> (B, d, d)
+                self.A_t = self.A_t - update_term
+
+        except RuntimeError:
+            # If solve fails (e.g. singular matrix)
+            if self.enable_stabilization:
+                self.fallback_count += B
+                fallback_add = self.stabilization_eps * torch.eye(d, device=u_r.device, dtype=u_r.dtype).unsqueeze(0).expand(B, -1, -1)
+                self.A_t = self.A_t + fallback_add
+            else:
+                raise
+
+        self.step += r
+
+        # 4. Periodic Stabilization
+        if self.enable_stabilization:
+            # Check if we crossed a period boundary
+            prev_step = self.step.item() - r
+            curr_step = self.step.item()
+            # This triggers if there is at least one multiple of `period` between prev_step (exclusive) and curr_step (inclusive)
+            if (curr_step // self.period) > (prev_step // self.period):
+                B = u_r.size(0)
+                I = torch.eye(d, device=u_r.device, dtype=u_r.dtype).unsqueeze(0).expand(B, -1, -1)
+                self.A_t = self.A_t + (self.periodic_eps * I)
+
     def _update_single(self, u: torch.Tensor):
         """
         Internal Sherman-Morrison update for a single vector u per batch.
