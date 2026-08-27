@@ -9,7 +9,7 @@ def run_pytest():
     # We run pytest but redirect its output so we can check it and emit our own 
     # expected statements for the log
     result = subprocess.run(
-        ["pytest", "-q", "tests/test_vla_ci.py"],
+        [sys.executable, "-m", "pytest", "-q", "tests/test_vla_ci.py"],
         capture_output=True,
         text=True
     )
